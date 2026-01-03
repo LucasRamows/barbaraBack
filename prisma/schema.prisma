@@ -1,0 +1,147 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+enum Role {
+SUPERADMIN
+ADMIN
+USER
+}
+
+enum TransactionType {
+INCOME
+EXPENSE
+}
+
+enum DayOfWeek {
+MONDAY
+TUESDAY
+WEDNESDAY
+THURSDAY
+FRIDAY
+SATURDAY
+SUNDAY
+}
+
+model User {
+id           String        @id @default(cuid())
+role         Role          @default(USER)
+name         String
+email        String        @unique
+birthDay     String?
+phone        String?       @unique
+key          String?       // Para Hash de senha ou chaves de API
+createdAt    DateTime      @default(now())
+updatedAt    DateTime      @updatedAt
+
+// Relações
+tasks        Task[]
+transactions Transaction[]
+workoutPlans WorkoutPlan[]
+notes        Note[]        // Para armazenar ideias e textos organizados
+}
+
+// --- MÓDULO DE TAREFAS ---
+model Task {
+id          String    @id @default(cuid())
+status      Boolean   @default(false)
+name        String
+description String?   @db.Text
+date        DateTime?
+isPriority  Boolean   @default(false)
+createdAt   DateTime  @default(now())
+updatedAt   DateTime  @updatedAt
+
+userId      String
+user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+reminders   Reminder[]
+}
+
+model Reminder {
+id        String   @id @default(cuid())
+time      DateTime
+taskId    String
+task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+// --- MÓDULO DE TEXTOS E IDEIAS ---
+model Note {
+id        String   @id @default(cuid())
+title     String
+content   String   @db.Text // Aqui fica o texto organizado (Markdown ou Rich Text)
+folder    String?  // Ex: "Ideias", "Projetos", "Estudos"
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+userId    String
+user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- MÓDULO FINANCEIRO ---
+model Transaction {
+id          String          @id @default(cuid())
+description String
+amount      Float
+type        TransactionType
+category    String          // Ex: Lazer, Saúde, Alimentação
+date        DateTime        @default(now())
+createdAt   DateTime        @default(now())
+updatedAt   DateTime        @updatedAt
+
+userId      String
+user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WorkoutPlan {
+id          String   @id @default(cuid())
+name        String   // Ex: "Treino Hipertrofia A", "Treino de Verão"
+description String?
+isActive    Boolean  @default(true)
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+
+userId      String
+user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+days        WorkoutDay[]
+}
+
+model WorkoutDay {
+id        String    @id @default(cuid())
+day       DayOfWeek
+label     String?   // Ex: "Push Day", "Legs Focus"
+
+workoutPlanId String
+workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+
+exercises ExerciseOnDay[]
+}
+
+model ExerciseOnDay {
+id          String   @id @default(cuid())
+order       Int      // Define qual exercício vem primeiro no dia
+sets        Int      // Séries
+reps        String   // Repetições (String para aceitar "10-12" ou "Até a falha")
+weight      Float?   // Peso atual
+restTime    Int?     // Tempo de descanso em segundos
+
+exerciseId  String
+exercise    Exercise @relation(fields: [exerciseId], references: [id])
+
+workoutDayId String
+workoutDay   WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+}
+
+model Exercise {
+id          String   @id @default(cuid())
+name        String   @unique
+targetMuscle String  // Ex: Peitoral, Quadríceps
+videoUrl    String?  // Link opcional de demonstração
+
+usageInDays ExerciseOnDay[]
+}
