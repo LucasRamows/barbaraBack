@@ -76,25 +76,20 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Busca o usuário pelo email
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Verifica se usuário existe e se possui uma chave (password hash)
     if (!user || !user.key) {
       return res.status(400).json({ error: "Credenciais inválidas." });
     }
 
-    // Compara a senha enviada com o hash no banco
     const isMatch = await bcrypt.compare(password, user.key);
     if (!isMatch) {
       return res.status(400).json({ error: "Credenciais inválidas." });
     }
 
-    // Gerar token incluindo o ID e o ROLE do usuário
     const token = jwt.sign(
       { id: user.id, role: user.role }, 
       SECRET_KEY, 
-      { expiresIn: "24h" }
     );
 
     res.json({ 

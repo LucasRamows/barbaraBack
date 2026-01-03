@@ -114,7 +114,7 @@ days        WorkoutDay[]
 model WorkoutDay {
 id        String    @id @default(cuid())
 day       DayOfWeek
-label     String?   // Ex: "Push Day", "Legs Focus"
+label     String?   
 
 workoutPlanId String
 workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
@@ -124,7 +124,7 @@ exercises ExerciseOnDay[]
 
 model ExerciseOnDay {
 id          String   @id @default(cuid())
-order       Int      // Define qual exercício vem primeiro no dia
+order       Int     
 sets        Int      // Séries
 reps        String   // Repetições (String para aceitar "10-12" ou "Até a falha")
 weight      Float?   // Peso atual

@@ -1,5 +1,6 @@
-import express from 'express';
-import prisma from '../../prisma/prisma';
+import express from "express";
+import prisma from "../../prisma/prisma";
+import { DayOfWeek } from "@prisma/client";
 
 const router = express.Router();
 
@@ -7,7 +8,7 @@ const router = express.Router();
  * @route   POST /api/fitness/plans
  * @desc    Cria um plano de treino
  */
-router.post('/plans', async (req: any, res: any) => {
+router.post("/plans", async (req: any, res: any) => {
   try {
     const { name, description } = req.body;
     const userId = req.user.id;
@@ -23,7 +24,7 @@ router.post('/plans', async (req: any, res: any) => {
     res.status(201).json(plan);
   } catch (error: any) {
     res.status(400).json({
-      error: 'Erro ao criar plano de treino',
+      error: "Erro ao criar plano de treino",
       details: error.message,
     });
   }
@@ -33,7 +34,7 @@ router.post('/plans', async (req: any, res: any) => {
  * @route   GET /api/fitness/plans
  * @desc    Lista planos de treino do usuário
  */
-router.get('/plans', async (req: any, res: any) => {
+router.get("/plans", async (req: any, res: any) => {
   try {
     const userId = req.user.id;
 
@@ -54,7 +55,7 @@ router.get('/plans', async (req: any, res: any) => {
 
     res.json(plans);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar planos de treino' });
+    res.status(500).json({ error: "Erro ao buscar planos de treino" });
   }
 });
 
@@ -62,7 +63,7 @@ router.get('/plans', async (req: any, res: any) => {
  * @route   PUT /api/fitness/plans/:id
  * @desc    Atualiza plano de treino
  */
-router.put('/plans/:id', async (req: any, res: any) => {
+router.put("/plans/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const { name, description, isActive } = req.body;
@@ -82,7 +83,7 @@ router.put('/plans/:id', async (req: any, res: any) => {
 
     res.json(plan);
   } catch (error) {
-    res.status(400).json({ error: 'Erro ao atualizar plano' });
+    res.status(400).json({ error: "Erro ao atualizar plano" });
   }
 });
 
@@ -90,7 +91,7 @@ router.put('/plans/:id', async (req: any, res: any) => {
  * @route   DELETE /api/fitness/plans/:id
  * @desc    Remove um plano de treino
  */
-router.delete('/plans/:id', async (req: any, res: any) => {
+router.delete("/plans/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -104,14 +105,14 @@ router.delete('/plans/:id', async (req: any, res: any) => {
 
     res.status(204).send();
   } catch (error) {
-    res.status(400).json({ error: 'Erro ao remover plano' });
+    res.status(400).json({ error: "Erro ao remover plano" });
   }
 });
 /**
  * @route   POST /api/fitness/plans/:planId/days
  * @desc    Adiciona um dia ao plano
  */
-router.post('/plans/:planId/days', async (req: any, res: any) => {
+router.post("/plans/:planId/days", async (req: any, res: any) => {
   try {
     const { planId } = req.params;
     const { day, label } = req.body;
@@ -123,7 +124,7 @@ router.post('/plans/:planId/days', async (req: any, res: any) => {
     });
 
     if (!plan) {
-      return res.status(404).json({ error: 'Plano não encontrado' });
+      return res.status(404).json({ error: "Plano não encontrado" });
     }
 
     const workoutDay = await prisma.workoutDay.create({
@@ -137,7 +138,7 @@ router.post('/plans/:planId/days', async (req: any, res: any) => {
     res.status(201).json(workoutDay);
   } catch (error: any) {
     res.status(400).json({
-      error: 'Erro ao adicionar dia de treino',
+      error: "Erro ao adicionar dia de treino",
       details: error.message,
     });
   }
@@ -146,17 +147,10 @@ router.post('/plans/:planId/days', async (req: any, res: any) => {
  * @route   POST /api/fitness/days/:dayId/exercises
  * @desc    Adiciona exercício a um dia de treino
  */
-router.post('/days/:dayId/exercises', async (req: any, res: any) => {
+router.post("/days/:dayId/exercises", async (req: any, res: any) => {
   try {
     const { dayId } = req.params;
-    const {
-      exerciseId,
-      order,
-      sets,
-      reps,
-      weight,
-      restTime,
-    } = req.body;
+    const { exerciseId, order, sets, reps, weight, restTime } = req.body;
 
     const exerciseOnDay = await prisma.exerciseOnDay.create({
       data: {
@@ -173,13 +167,13 @@ router.post('/days/:dayId/exercises', async (req: any, res: any) => {
     res.status(201).json(exerciseOnDay);
   } catch (error: any) {
     res.status(400).json({
-      error: 'Erro ao adicionar exercício',
+      error: "Erro ao adicionar exercício",
       details: error.message,
     });
   }
 });
 
-router.put('/exercises-on-day/:id', async (req, res) => {
+router.put("/exercises-on-day/:id", async (req, res) => {
   const { id } = req.params;
   const { order, sets, reps, weight, restTime, exerciseId } = req.body;
 
@@ -199,6 +193,79 @@ router.put('/exercises-on-day/:id', async (req, res) => {
   });
 
   res.json(updated);
+});
+
+const getTodayEnum = (): DayOfWeek => {
+  const jsDay = new Date().getDay(); 
+  switch (jsDay) {
+    case 0:
+      return DayOfWeek.SUNDAY;
+    case 1:
+      return DayOfWeek.MONDAY;
+    case 2:
+      return DayOfWeek.TUESDAY;
+    case 3:
+      return DayOfWeek.WEDNESDAY;
+    case 4:
+      return DayOfWeek.THURSDAY;
+    case 5:
+      return DayOfWeek.FRIDAY;
+    case 6:
+      return DayOfWeek.SATURDAY;
+    default:
+      throw new Error("Dia inválido");
+  }
+};
+
+router.get("/users/by-phone/:phone/exercises/today", async (req, res) => {
+  const { phone } = req.params;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { phone: phone },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    const today = getTodayEnum(); 
+    const workoutDays = await prisma.workoutDay.findMany({
+      where: {
+        day: today,
+        workoutPlan: {
+          userId: user.id,   // usa o ID do usuário encontrado
+          isActive: true,
+        },
+      },
+      include: {
+        exercises: {
+          orderBy: { order: "asc" },
+          include: { exercise: true },
+        },
+      },
+    });
+    console.log(workoutDays)
+    const exercises = workoutDays.flatMap(day =>
+      day.exercises.map(e => ({
+        id: e.exercise.id,
+        name: e.exercise.name,
+        targetMuscle: e.exercise.targetMuscle,
+        videoUrl: e.exercise.videoUrl,
+        order: e.order,
+        sets: e.sets,
+        reps: e.reps,
+        weight: e.weight,
+        restTime: e.restTime,
+        plan: e.id
+      }))
+    );
+
+    res.json(exercises);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar exercícios" });
+  }
 });
 
 
@@ -239,8 +306,6 @@ router.post("/exercises", async (req: any, res: any) => {
   }
 });
 
-
-
 router.get("/exercises", async (req: any, res: any) => {
   try {
     const { search } = req.query;
@@ -268,7 +333,7 @@ router.get("/exercises", async (req: any, res: any) => {
   }
 });
 
-router.delete('/exercises-on-day/:id', async (req, res) => {
+router.delete("/exercises-on-day/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -279,12 +344,10 @@ router.delete('/exercises-on-day/:id', async (req, res) => {
     res.status(204).send();
   } catch (error: any) {
     res.status(400).json({
-      error: 'Erro ao remover exercício',
+      error: "Erro ao remover exercício",
       details: error.message,
     });
   }
 });
-
-
 
 export default router;
