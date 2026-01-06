@@ -7,7 +7,9 @@ import workout from "./src/routes/workout";
 import me from "./src/routes/me";
 import publ from "./src/routes/public";
 import notes from "./src/routes/notes";
-import whatsappRoutes from "./src/routes/whatsapp"; // Nova Rota
+import whatsappRoutes from "./src/routes/whatsapp";
+import health from "./src/routes/health";
+import tasks from "./src/routes/tasks";
 import publicRoutes from "./src/routes/public";
 
 // Middleware
@@ -25,7 +27,9 @@ app.use("/private", auth, finance);
 app.use("/private", auth, workout);
 app.use("/private", auth, me);
 app.use("/private", auth, notes);
-app.use("/private", auth, whatsappRoutes); // Registro da nova rota de WhatsApp
+app.use("/private", auth, whatsappRoutes);
+app.use("/private", auth, health);
+app.use("/private", auth, tasks);
 app.use("/public", publ); 
 
 app.listen(3000, () => {
