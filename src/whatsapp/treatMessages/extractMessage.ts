@@ -1,21 +1,37 @@
 const extractMessages = (msgs: any[]): string[] => {
-  const mensagens: string[] = [];
+  const messages: string[] = [];
 
-  const extractChildren = (node: any) => {
+  const extractChildren = (node: any, buffer: string[]) => {
     if (!node) return;
 
-    if (node.text) {
-      mensagens.push(node.text);
-    } else if (node.content?.richText) {
-      node.content.richText.forEach(extractChildren);
-    } else if (node.children) {
-      node.children.forEach(extractChildren);
+    if (typeof node.text === "string") {
+      buffer.push(node.text);
+    }
+
+    if (node.content?.richText) {
+      node.content.richText.forEach((child: any) =>
+        extractChildren(child, buffer)
+      );
+    }
+
+    if (node.children) {
+      node.children.forEach((child: any) =>
+        extractChildren(child, buffer)
+      );
     }
   };
 
-  msgs.forEach((msg) => extractChildren(msg));
+  for (const msg of msgs) {
+    const buffer: string[] = [];
+    extractChildren(msg, buffer);
 
-  return mensagens;
+    // junta sem adicionar espaços extras
+    const finalText = buffer.join("\n");
+
+    messages.push(finalText);
+  }
+
+  return messages;
 };
 
-export default extractMessages;
+export default extractMessages

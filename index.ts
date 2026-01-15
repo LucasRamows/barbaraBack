@@ -8,6 +8,7 @@ import me from "./src/routes/me";
 import publ from "./src/routes/public";
 import notes from "./src/routes/notes";
 import whatsappRoutes from "./src/routes/whatsapp";
+import security from "./src/routes/security";
 import health from "./src/routes/health";
 import tasks from "./src/routes/tasks";
 import publicRoutes from "./src/routes/public";
@@ -29,6 +30,7 @@ app.use("/private", auth, me);
 app.use("/private", auth, notes);
 app.use("/private", auth, whatsappRoutes);
 app.use("/private", auth, health);
+app.use("/private", auth, security);
 app.use("/private", auth, tasks);
 app.use("/public", publ); 
 

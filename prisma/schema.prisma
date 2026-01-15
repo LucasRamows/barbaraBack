@@ -50,9 +50,22 @@ model User {
   workoutPlans WorkoutPlan[]
   notes        Note[]
   health       Health[]
+  securities   Security[]
+  settings     Settings[]
 }
 
-model Task {  
+// --- MÓDULO DE CONF ---
+model Settings {
+  id             String   @id @default(cuid())
+  notifyCalendar Boolean
+  publicKey      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Task {
   id          String    @id @default(cuid())
   type        TaskType
   status      Boolean   @default(false)
@@ -98,6 +111,18 @@ model Note {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- MÓDULO DE SENHAS E SEGURANÇA ---
+model Security {
+  id        String   @id @default(cuid())
+  site      String
+  email     String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // --- MÓDULO FINANCEIRO ---

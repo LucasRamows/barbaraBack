@@ -15,58 +15,67 @@ router.post("/register", async (req, res) => {
   try {
     const { name, email, password, birthDay, phone, role } = req.body;
 
-    // 1. Validação básica
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "Nome, email e senha são obrigatórios." });
+      return res.status(400).json({
+        error: "Nome, email e senha são obrigatórios.",
+      });
     }
 
-    // 2. Verificar se o usuário ou telefone já existem (campos @unique)
     const userExists = await prisma.user.findFirst({
       where: {
         OR: [
-          { email: email },
-          { phone: phone || undefined }
-        ]
-      }
+          { email },
+          { phone: phone || undefined },
+        ],
+      },
     });
 
     if (userExists) {
-      return res.status(400).json({ error: "Email ou telefone já cadastrados." });
+      return res.status(400).json({
+        error: "Email ou telefone já cadastrados.",
+      });
     }
 
-    // 3. Hash da senha
-    const saltRounds = 10;
-    const hashedKey = await bcrypt.hash(password, saltRounds);
+    const hashedKey = await bcrypt.hash(password, 10);
 
-    // 4. Criação no Banco de Dados
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
         birthDay,
         phone,
-        role: role || 'USER',
+        role: role || "USER",
         key: hashedKey,
+
+        // 👇 cria settings automaticamente
+        settings: {
+          create: {
+            publicKey: "",
+            notifyCalendar:true
+          },
+        },
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     return res.status(201).json({
       message: "Usuário criado com sucesso!",
-      user: newUser
+      user: newUser,
     });
-
   } catch (error) {
     console.error("Erro no registro:", error);
-    return res.status(500).json({ error: "Erro interno ao processar o cadastro." });
+    return res.status(500).json({
+      error: "Erro interno ao processar o cadastro.",
+    });
   }
 });
+
 
 /**
  * POST /auth/login
