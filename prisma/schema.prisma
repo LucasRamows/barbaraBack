@@ -24,6 +24,13 @@ enum TaskType {
   WORK
 }
 
+enum TaskPriority {
+  URGENT
+  PRIORITY
+  DATED
+  NODATE
+}
+
 enum DayOfWeek {
   MONDAY
   TUESDAY
@@ -66,15 +73,15 @@ model Settings {
 }
 
 model Task {
-  id          String    @id @default(cuid())
+  id          String       @id @default(cuid())
   type        TaskType
-  status      Boolean   @default(false)
+  status      Boolean      @default(false)
   name        String
-  description String?   @db.Text
+  description String?      @db.Text
   date        DateTime?
-  isPriority  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isPriority  TaskPriority @default(NODATE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)

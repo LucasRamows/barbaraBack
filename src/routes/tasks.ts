@@ -17,7 +17,7 @@ router.post('/tasks', async (req: any, res: any) => {
         name,
         type, // Ex: 'HEALTH', 'WORK'
         description,
-        isPriority: isPriority || false,
+        isPriority: isPriority,
         date: new Date(date),
         userId,
         // Se houver um horário de lembrete, cria automaticamente o registro vinculado
