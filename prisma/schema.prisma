@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -7,28 +7,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ============================
+// ENUMS
+// ============================
+
 enum Role {
-  SUPERADMIN
-  ADMIN
-  USER
+  SUPER_ADMIN
+  PERSONAL
+  ALUNO
 }
 
-enum TransactionType {
-  INCOME
-  EXPENSE
-  CREDIT
-}
-
-enum TaskType {
-  HEALTH
-  WORK
-}
-
-enum TaskPriority {
-  URGENT
-  PRIORITY
-  DATED
-  NODATE
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
 }
 
 enum DayOfWeek {
@@ -41,156 +33,655 @@ enum DayOfWeek {
   SUNDAY
 }
 
+enum WeightUnit {
+  KG
+  LB
+}
+
+enum MuscleGroup {
+  CHEST
+  BACK
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  FOREARMS
+  CORE
+  GLUTES
+  QUADRICEPS
+  HAMSTRINGS
+  CALVES
+  FULL_BODY
+  OTHER
+}
+
+enum WorkoutSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  PARTIAL
+  CANCELLED
+}
+
+enum LoadChangeOrigin {
+  MANUAL
+  ALGORITHMIC
+  PERSONAL_OVERRIDE
+}
+
+enum DeloadStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PhotoPosition {
+  FRONT
+  BACK
+  RIGHT_SIDE
+  LEFT_SIDE
+  FREE
+}
+
+enum RewardRuleType {
+  WORKOUT_STREAK
+  TOTAL_WORKOUTS
+  WORKOUT_FREQUENCY
+  LOAD_INCREASE
+  EXERCISE_GOAL
+  SPECIFIC_WORKOUT
+  BODY_MEASUREMENT
+  CUSTOM
+}
+
+enum RewardAchievementStatus {
+  IN_PROGRESS
+  ACHIEVED
+  AWAITING_APPROVAL
+  APPROVED
+  REJECTED
+  DELIVERED
+  CANCELLED
+}
+
+// ============================
+// CORE USER
+// ============================
+
 model User {
-  id        String   @id @default(cuid())
-  role      Role     @default(USER)
-  name      String
-  email     String   @unique
-  birthDay  String?
-  phone     String?  @unique
-  key       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String     @id @default(cuid())
+  username           String     @unique
+  passwordHash       String
+  role               Role
+  status             UserStatus @default(ACTIVE)
+  mustChangePassword Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  deletedAt          DateTime?
 
-  tasks        Task[]
-  transactions Transaction[]
-  workoutPlans WorkoutPlan[]
-  notes        Note[]
-  health       Health[]
-  securities   Security[]
-  settings     Settings[]
+  personalProfile PersonalProfile?
+  studentProfile  StudentProfile?
+  refreshTokens   RefreshToken[]
+  auditLogs       AuditLog[]
+
+  @@index([username])
+  @@index([role])
+  @@index([status])
+  @@index([deletedAt])
 }
 
-// --- MÓDULO DE CONF ---
-model Settings {
-  id             String   @id @default(cuid())
-  notifyCalendar Boolean
-  publicKey      String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Task {
-  id          String       @id @default(cuid())
-  type        TaskType
-  status      Boolean      @default(false)
-  name        String
-  description String?      @db.Text
-  date        DateTime?
-  isPriority  TaskPriority @default(NODATE)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reminders Reminder[]
-}
-
-model Health {
+model RefreshToken {
   id        String    @id @default(cuid())
-  title     String
-  note      String?   @db.Text
-  date      DateTime?
-  category  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  token     String    @unique @db.VarChar(512)
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
 }
 
-model Reminder {
-  id     String   @id @default(cuid())
-  time   DateTime
-  taskId String
-  task   Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+// ============================
+// PERSONAL PROFILE
+// ============================
+
+model PersonalProfile {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  avatarUrl String?   @db.Text
+  bio       String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  students          PersonalStudent[]
+  exercises         Exercise[]
+  workoutPlans      WorkoutPlan[]
+  deloadPeriods     DeloadPeriod[]
+  loadRules         LoadProgressionRule[]
+  rewardRules       RewardRule[]
+  gifts             Gift[]
+
+  @@index([userId])
+  @@index([deletedAt])
 }
 
-// --- MÓDULO DE TEXTOS E IDEIAS ---
-model Note {
-  id        String   @id @default(cuid())
-  title     String
-  content   String   @db.Text
-  folder    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ============================
+// STUDENT PROFILE
+// ============================
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+model StudentProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  email           String?
+  phone           String?
+  birthDate       DateTime?
+  sex             String?
+  avatarUrl       String?   @db.Text
+  height          Float?
+  objective       String?   @db.Text
+  experienceLevel String?
+  restrictions    String?   @db.Text
+  observations    String?   @db.Text
+  startDate       DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  personalStudents   PersonalStudent[]
+  workoutSessions    WorkoutSession[]
+  workoutSchedules   WorkoutSchedule[]
+  bodyMeasurements   BodyMeasurement[]
+  progressPhotos     ProgressPhoto[]
+  rewardProgresses   RewardProgress[]
+  rewardAchievements RewardAchievement[]
+  deloadPeriods      DeloadPeriod[]
+  loadSuggestions    LoadSuggestion[]
+
+  @@index([userId])
+  @@index([deletedAt])
 }
 
-// --- MÓDULO DE SENHAS E SEGURANÇA ---
-model Security {
-  id        String   @id @default(cuid())
-  site      String
-  email     String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model PersonalStudent {
+  id         String          @id @default(cuid())
+  personalId String
+  studentId  String
+  personal   PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  student    StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+
+  @@unique([personalId, studentId])
+  @@index([personalId])
+  @@index([studentId])
 }
 
-// --- MÓDULO FINANCEIRO ---
-model Transaction {
-  id          String          @id @default(cuid())
-  description String
-  amount      Float
-  type        TransactionType
-  category    String
-  date        DateTime        @default(now())
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model WorkoutPlan {
-  id          String   @id @default(cuid())
-  name        String // Ex: "Treino Hipertrofia A", "Treino de Verão"
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  userId String
-  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  days   WorkoutDay[]
-}
-
-model WorkoutDay {
-  id    String    @id @default(cuid())
-  day   DayOfWeek
-  label String?
-
-  workoutPlanId String
-  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
-
-  exercises ExerciseOnDay[]
-}
-
-model ExerciseOnDay {
-  id       String @id @default(cuid())
-  order    Int
-  sets     Int // Séries
-  reps     String // Repetições (String para aceitar "10-12" ou "Até a falha")
-  weight   Float? // Peso atual
-  restTime Int? // Tempo de descanso em segundos
-
-  exerciseId String
-  exercise   Exercise @relation(fields: [exerciseId], references: [id])
-
-  workoutDayId String
-  workoutDay   WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
-}
+// ============================
+// EXERCISES
+// ============================
 
 model Exercise {
-  id           String  @id @default(cuid())
-  name         String  @unique
-  targetMuscle String // Ex: Peitoral, Quadríceps
-  videoUrl     String? // Link opcional de demonstração
+  id                 String          @id @default(cuid())
+  personalId         String
+  personal           PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  name               String
+  description        String?         @db.Text
+  muscleGroup        MuscleGroup
+  instructions       String?         @db.Text
+  isUnilateral       Boolean         @default(false)
+  defaultSets        Int             @default(3)
+  minReps            Int             @default(8)
+  maxReps            Int             @default(12)
+  defaultWeight      Float?
+  weightUnit         WeightUnit      @default(KG)
+  restSeconds        Int             @default(60)
+  rpeTarget          Int?
+  progressionEnabled Boolean         @default(true)
+  suggestedIncrement Float?
+  notes              String?         @db.Text
+  isActive           Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  deletedAt          DateTime?
 
-  usageInDays ExerciseOnDay[]
+  images           ExerciseImage[]
+  workoutExercises WorkoutExercise[]
+
+  @@index([personalId])
+  @@index([muscleGroup])
+  @@index([deletedAt])
+}
+
+model ExerciseImage {
+  id         String   @id @default(cuid())
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  url        String   @db.Text
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([exerciseId])
+}
+
+// ============================
+// WORKOUT PLANS
+// ============================
+
+model WorkoutPlan {
+  id               String          @id @default(cuid())
+  personalId       String
+  personal         PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  name             String
+  description      String?         @db.Text
+  objective        String?
+  estimatedMinutes Int?
+  isActive         Boolean         @default(true)
+  validFrom        DateTime?
+  validUntil       DateTime?
+  version          Int             @default(1)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+
+  days      WorkoutPlanDay[]
+  schedules WorkoutSchedule[]
+  sessions  WorkoutSession[]
+
+  @@index([personalId])
+  @@index([deletedAt])
+}
+
+model WorkoutPlanDay {
+  id            String      @id @default(cuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  dayOfWeek     DayOfWeek
+  label         String?
+  order         Int         @default(0)
+
+  exercises WorkoutExercise[]
+
+  @@index([workoutPlanId])
+}
+
+model WorkoutExercise {
+  id               String         @id @default(cuid())
+  workoutPlanDayId String
+  workoutPlanDay   WorkoutPlanDay @relation(fields: [workoutPlanDayId], references: [id], onDelete: Cascade)
+  exerciseId       String
+  exercise         Exercise       @relation(fields: [exerciseId], references: [id])
+  order            Int            @default(0)
+  sets             Int
+  minReps          Int
+  maxReps          Int
+  weight           Float?
+  weightUnit       WeightUnit     @default(KG)
+  restSeconds      Int            @default(60)
+  rpeTarget        Int?
+  notes            String?        @db.Text
+  progressionEnabled Boolean      @default(true)
+
+  @@index([workoutPlanDayId])
+  @@index([exerciseId])
+}
+
+// ============================
+// WORKOUT SCHEDULES
+// ============================
+
+model WorkoutSchedule {
+  id            String         @id @default(cuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  workoutPlanId String
+  workoutPlan   WorkoutPlan    @relation(fields: [workoutPlanId], references: [id])
+  dayOfWeek     DayOfWeek
+  isActive      Boolean        @default(true)
+  validFrom     DateTime?
+  validUntil    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([studentId])
+  @@index([workoutPlanId])
+}
+
+// ============================
+// WORKOUT SESSIONS
+// ============================
+
+model WorkoutSession {
+  id              String               @id @default(cuid())
+  studentId       String
+  student         StudentProfile       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  workoutPlanId   String?
+  workoutPlan     WorkoutPlan?         @relation(fields: [workoutPlanId], references: [id])
+  scheduledPlanId String?
+  planSnapshot    Json
+  startedAt       DateTime             @default(now())
+  finishedAt      DateTime?
+  durationSeconds Int?
+  status          WorkoutSessionStatus @default(IN_PROGRESS)
+  partialReason   String?              @db.Text
+  isDeload        Boolean              @default(false)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  exercises WorkoutSessionExercise[]
+
+  @@index([studentId])
+  @@index([workoutPlanId])
+  @@index([startedAt])
+  @@index([status])
+}
+
+model WorkoutSessionExercise {
+  id               String         @id @default(cuid())
+  sessionId        String
+  session          WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId       String
+  exerciseName     String
+  exerciseSnapshot Json
+  order            Int
+  isCompleted      Boolean        @default(false)
+
+  sets WorkoutSet[]
+
+  @@index([sessionId])
+  @@index([exerciseId])
+}
+
+model WorkoutSet {
+  id                String                 @id @default(cuid())
+  sessionExerciseId String
+  sessionExercise   WorkoutSessionExercise @relation(fields: [sessionExerciseId], references: [id], onDelete: Cascade)
+  setNumber         Int
+  plannedReps       Int
+  completedReps     Int?
+  plannedWeight     Float?
+  usedWeight        Float?
+  weightUnit        WeightUnit             @default(KG)
+  rpe               Int?
+  isCompleted       Boolean                @default(false)
+  notes             String?                @db.Text
+  completedAt       DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@index([sessionExerciseId])
+}
+
+// ============================
+// LOAD PROGRESSION
+// ============================
+
+model LoadProgressionRule {
+  id               String          @id @default(cuid())
+  personalId       String
+  personal         PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  name             String
+  sessionsRequired Int             @default(2)
+  incrementFixed   Float?
+  incrementPercent Float?
+  maxRpe           Int             @default(8)
+  roundingStep     Float?
+  minWeight        Float?
+  maxWeight        Float?
+  muscleGroup      MuscleGroup?
+  isDefault        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([personalId])
+}
+
+model LoadSuggestion {
+  id              String         @id @default(cuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  exerciseId      String
+  currentWeight   Float
+  suggestedWeight Float
+  justification   String         @db.Text
+  isAccepted      Boolean?
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([studentId])
+  @@index([exerciseId])
+}
+
+model LoadChangeHistory {
+  id             String          @id @default(cuid())
+  studentId      String
+  exerciseId     String
+  exerciseName   String
+  previousWeight Float
+  newWeight      Float
+  weightUnit     WeightUnit      @default(KG)
+  changedById    String
+  reason         String?         @db.Text
+  origin         LoadChangeOrigin @default(MANUAL)
+  createdAt      DateTime        @default(now())
+
+  @@index([studentId])
+  @@index([exerciseId])
+  @@index([createdAt])
+}
+
+// ============================
+// DELOAD
+// ============================
+
+model DeloadPeriod {
+  id               String          @id @default(cuid())
+  studentId        String
+  student          StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  personalId       String
+  personal         PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  startDate        DateTime
+  endDate          DateTime
+  reductionPercent Float
+  reason           String?         @db.Text
+  observations     String?         @db.Text
+  status           DeloadStatus    @default(ACTIVE)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([studentId])
+  @@index([personalId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model DeloadSuggestion {
+  id            String   @id @default(cuid())
+  studentId     String
+  triggerReason String   @db.Text
+  isApproved    Boolean?
+  approvedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([studentId])
+}
+
+// ============================
+// BODY MEASUREMENTS
+// ============================
+
+model BodyMeasurement {
+  id             String         @id @default(cuid())
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  measuredAt     DateTime       @default(now())
+  measuredById   String
+  weight         Float?
+  height         Float?
+  bodyFatPercent Float?
+  shoulders      Float?
+  chest          Float?
+  waist          Float?
+  abdomen        Float?
+  hips           Float?
+  rightArm       Float?
+  leftArm        Float?
+  rightForearm   Float?
+  leftForearm    Float?
+  rightThigh     Float?
+  leftThigh      Float?
+  rightCalf      Float?
+  leftCalf       Float?
+  notes          String?        @db.Text
+  createdAt      DateTime       @default(now())
+
+  @@index([studentId])
+  @@index([measuredAt])
+}
+
+// ============================
+// PROGRESS PHOTOS
+// ============================
+
+model ProgressPhoto {
+  id           String         @id @default(cuid())
+  studentId    String
+  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fileUrl      String         @db.Text
+  fileKey      String         @db.Text
+  takenAt      DateTime       @default(now())
+  category     String?
+  position     PhotoPosition  @default(FRONT)
+  observations String?        @db.Text
+  uploadedById String
+  createdAt    DateTime       @default(now())
+  deletedAt    DateTime?
+
+  @@index([studentId])
+  @@index([takenAt])
+  @@index([position])
+  @@index([deletedAt])
+}
+
+// ============================
+// GIFTS & REWARDS
+// ============================
+
+model Gift {
+  id           String          @id @default(cuid())
+  personalId   String
+  personal     PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?         @db.Text
+  imageUrl     String?         @db.Text
+  instructions String?         @db.Text
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+
+  rewardRules RewardRule[]
+
+  @@index([personalId])
+  @@index([deletedAt])
+}
+
+model RewardRule {
+  id               String          @id @default(cuid())
+  personalId       String
+  personal         PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  giftId           String?
+  gift             Gift?           @relation(fields: [giftId], references: [id])
+  name             String
+  description      String?         @db.Text
+  type             RewardRuleType
+  targetValue      Float?
+  period           String?
+  conditions       Json?
+  startDate        DateTime?
+  endDate          DateTime?
+  requiresApproval Boolean         @default(true)
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  progresses RewardProgress[]
+
+  @@index([personalId])
+}
+
+model RewardProgress {
+  id           String         @id @default(cuid())
+  studentId    String
+  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  ruleId       String
+  rule         RewardRule     @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  currentValue Float          @default(0)
+  updatedAt    DateTime       @updatedAt
+
+  achievements RewardAchievement[]
+
+  @@unique([studentId, ruleId])
+  @@index([studentId])
+}
+
+model RewardAchievement {
+  id            String                  @id @default(cuid())
+  studentId     String
+  student       StudentProfile          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  progressId    String
+  progress      RewardProgress          @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  status        RewardAchievementStatus @default(ACHIEVED)
+  approvedById  String?
+  approvedAt    DateTime?
+  rejectedById  String?
+  rejectedAt    DateTime?
+  deliveredById String?
+  deliveredAt   DateTime?
+  notes         String?                 @db.Text
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([studentId])
+  @@index([progressId])
+  @@index([status])
+}
+
+// ============================
+// PLATFORM SETTINGS
+// ============================
+
+model PlatformSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+// ============================
+// AUDIT LOG
+// ============================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([resource])
+  @@index([createdAt])
 }

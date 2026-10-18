@@ -8,25 +8,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
-const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
+const throttler_1 = require("@nestjs/throttler");
 const prisma_module_1 = require("./prisma/prisma.module");
-const finance_module_1 = require("./finance/finance.module");
-const health_module_1 = require("./health/health.module");
-const user_module_1 = require("./user/user.module");
-const notes_module_1 = require("./notes/notes.module");
-const security_module_1 = require("./security/security.module");
-const tasks_module_1 = require("./tasks/tasks.module");
-const workout_module_1 = require("./workout/workout.module");
-const public_module_1 = require("./public/public.module");
+const storage_module_1 = require("./storage/storage.module");
+const auth_module_1 = require("./auth/auth.module");
+const users_module_1 = require("./users/users.module");
+const personals_module_1 = require("./personals/personals.module");
+const students_module_1 = require("./students/students.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, finance_module_1.FinanceModule, health_module_1.HealthModule, user_module_1.UserModule, notes_module_1.NotesModule, security_module_1.SecurityModule, tasks_module_1.TasksModule, workout_module_1.WorkoutModule, public_module_1.PublicModule],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        imports: [
+            throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+            prisma_module_1.PrismaModule,
+            storage_module_1.StorageModule,
+            auth_module_1.AuthModule,
+            users_module_1.UsersModule,
+            personals_module_1.PersonalsModule,
+            students_module_1.StudentsModule,
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
-import { FinanceModule } from './finance/finance.module';
-import { HealthModule } from './health/health.module';
-import { UserModule } from './user/user.module';
-import { NotesModule } from './notes/notes.module';
-import { SecurityModule } from './security/security.module';
-import { TasksModule } from './tasks/tasks.module';
-import { WorkoutModule } from './workout/workout.module';
-import { PublicModule } from './public/public.module';
+import { StorageModule } from './storage/storage.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { PersonalsModule } from './personals/personals.module';
+import { StudentsModule } from './students/students.module';
 
 @Module({
-  imports: [PrismaModule, FinanceModule, HealthModule, UserModule, NotesModule, SecurityModule, TasksModule, WorkoutModule, PublicModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    PrismaModule,
+    StorageModule,
+    AuthModule,
+    UsersModule,
+    PersonalsModule,
+    StudentsModule,
+  ],
 })
 export class AppModule {}
