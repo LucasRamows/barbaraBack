@@ -11,19 +11,19 @@ export declare class ExercisesService {
     private getOwned;
     create(dto: CreateExerciseDto, currentUser: CurrentUserPayload): Promise<{
         images: {
-            url: string;
             id: string;
             createdAt: Date;
+            url: string;
             order: number;
             exerciseId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
         instructions: string | null;
@@ -42,19 +42,19 @@ export declare class ExercisesService {
     }>;
     findAll(currentUser: CurrentUserPayload): Promise<({
         images: {
-            url: string;
             id: string;
             createdAt: Date;
+            url: string;
             order: number;
             exerciseId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
         instructions: string | null;
@@ -73,19 +73,19 @@ export declare class ExercisesService {
     })[]>;
     findOne(id: string, currentUser: CurrentUserPayload): Promise<{
         images: {
-            url: string;
             id: string;
             createdAt: Date;
+            url: string;
             order: number;
             exerciseId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
         instructions: string | null;
@@ -104,19 +104,19 @@ export declare class ExercisesService {
     }>;
     update(id: string, dto: UpdateExerciseDto, currentUser: CurrentUserPayload): Promise<{
         images: {
-            url: string;
             id: string;
             createdAt: Date;
+            url: string;
             order: number;
             exerciseId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
         instructions: string | null;
@@ -135,9 +135,9 @@ export declare class ExercisesService {
     }>;
     remove(id: string, currentUser: CurrentUserPayload): Promise<void>;
     addImage(id: string, file: Express.Multer.File, currentUser: CurrentUserPayload): Promise<{
-        url: string;
         id: string;
         createdAt: Date;
+        url: string;
         order: number;
         exerciseId: string;
     }>;

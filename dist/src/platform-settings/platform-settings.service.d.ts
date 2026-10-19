@@ -7,15 +7,15 @@ export declare class PlatformSettingsService implements OnModuleInit {
     constructor(prisma: PrismaService);
     onModuleInit(): Promise<void>;
     findAll(): Promise<{
-        key: string;
         id: string;
         updatedAt: Date;
+        key: string;
         value: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
     upsert(key: string, dto: UpsertSettingDto, _currentUser: CurrentUserPayload): Promise<{
-        key: string;
         id: string;
         updatedAt: Date;
+        key: string;
         value: import("@prisma/client/runtime/library").JsonValue;
     }>;
 }

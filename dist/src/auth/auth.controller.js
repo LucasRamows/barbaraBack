@@ -19,6 +19,7 @@ const throttler_1 = require("@nestjs/throttler");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const refresh_dto_1 = require("./dto/refresh.dto");
+const public_decorator_1 = require("./public.decorator");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -36,6 +37,7 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.UseGuards)(throttler_1.ThrottlerGuard),
@@ -47,6 +49,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('refresh'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Renovar access token' }),
@@ -56,6 +59,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "refresh", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('logout'),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     (0, swagger_1.ApiOperation)({ summary: 'Encerrar sessão' }),

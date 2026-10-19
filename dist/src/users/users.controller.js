@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const users_service_1 = require("./users.service");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
+const change_password_dto_1 = require("./dto/change-password.dto");
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
@@ -24,6 +25,9 @@ let UsersController = class UsersController {
     }
     getMe(currentUser) {
         return this.usersService.getMe(currentUser);
+    }
+    changePassword(currentUser, dto) {
+        return this.usersService.changePassword(currentUser, dto.currentPassword, dto.newPassword);
     }
 };
 exports.UsersController = UsersController;
@@ -35,6 +39,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.Put)('me/change-password'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    (0, swagger_1.ApiOperation)({ summary: 'Trocar senha do usuário autenticado' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "changePassword", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('users'),
     (0, swagger_1.ApiBearerAuth)(),

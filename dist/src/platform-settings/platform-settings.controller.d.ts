@@ -5,15 +5,15 @@ export declare class PlatformSettingsController {
     private readonly service;
     constructor(service: PlatformSettingsService);
     findAll(): Promise<{
-        key: string;
         id: string;
         updatedAt: Date;
+        key: string;
         value: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
     upsert(key: string, dto: UpsertSettingDto, user: CurrentUserPayload): Promise<{
-        key: string;
         id: string;
         updatedAt: Date;
+        key: string;
         value: import("@prisma/client/runtime/library").JsonValue;
     }>;
 }

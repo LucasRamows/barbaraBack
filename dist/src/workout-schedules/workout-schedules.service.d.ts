@@ -10,8 +10,8 @@ export declare class WorkoutSchedulesService {
     private assertPlanOwnership;
     create(dto: CreateWorkoutScheduleDto, currentUser: CurrentUserPayload): Promise<{
         workoutPlan: {
-            name: string;
             id: string;
+            name: string;
         };
     } & {
         id: string;
@@ -26,8 +26,8 @@ export declare class WorkoutSchedulesService {
     }>;
     findByStudent(studentId: string, currentUser: CurrentUserPayload): Promise<({
         workoutPlan: {
-            name: string;
             id: string;
+            name: string;
             objective: string | null;
             estimatedMinutes: number | null;
         };
@@ -44,8 +44,8 @@ export declare class WorkoutSchedulesService {
     })[]>;
     update(id: string, dto: UpdateWorkoutScheduleDto, currentUser: CurrentUserPayload): Promise<{
         workoutPlan: {
-            name: string;
             id: string;
+            name: string;
         };
     } & {
         id: string;

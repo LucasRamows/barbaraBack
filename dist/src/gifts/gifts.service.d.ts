@@ -7,48 +7,48 @@ export declare class GiftsService {
     constructor(prisma: PrismaService);
     private getPersonalProfile;
     create(dto: CreateGiftDto, currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         instructions: string | null;
         isActive: boolean;
         imageUrl: string | null;
     }>;
     findAll(currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         instructions: string | null;
         isActive: boolean;
         imageUrl: string | null;
     }[]>;
     findOne(id: string, currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         instructions: string | null;
         isActive: boolean;
         imageUrl: string | null;
     }>;
     update(id: string, dto: UpdateGiftDto, currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         personalId: string;
         instructions: string | null;
         isActive: boolean;

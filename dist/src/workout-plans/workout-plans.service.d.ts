@@ -14,12 +14,12 @@ export declare class WorkoutPlansService {
     private getOwnedPlan;
     private getOwnedDay;
     createPlan(dto: CreateWorkoutPlanDto, currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         objective: string | null;
         personalId: string;
         isActive: boolean;
@@ -29,12 +29,12 @@ export declare class WorkoutPlansService {
         version: number;
     }>;
     findAllPlans(currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         objective: string | null;
         personalId: string;
         isActive: boolean;
@@ -48,19 +48,19 @@ export declare class WorkoutPlansService {
             exercises: ({
                 exercise: {
                     images: {
-                        url: string;
                         id: string;
                         createdAt: Date;
+                        url: string;
                         order: number;
                         exerciseId: string;
                     }[];
                 } & {
-                    name: string;
-                    description: string | null;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
                     deletedAt: Date | null;
+                    name: string;
+                    description: string | null;
                     personalId: string;
                     muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
                     instructions: string | null;
@@ -100,12 +100,12 @@ export declare class WorkoutPlansService {
             workoutPlanId: string;
         })[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         objective: string | null;
         personalId: string;
         isActive: boolean;
@@ -115,12 +115,12 @@ export declare class WorkoutPlansService {
         version: number;
     }>;
     updatePlan(id: string, dto: UpdateWorkoutPlanDto, currentUser: CurrentUserPayload): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         objective: string | null;
         personalId: string;
         isActive: boolean;
@@ -135,19 +135,19 @@ export declare class WorkoutPlansService {
             exercises: ({
                 exercise: {
                     images: {
-                        url: string;
                         id: string;
                         createdAt: Date;
+                        url: string;
                         order: number;
                         exerciseId: string;
                     }[];
                 } & {
-                    name: string;
-                    description: string | null;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
                     deletedAt: Date | null;
+                    name: string;
+                    description: string | null;
                     personalId: string;
                     muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
                     instructions: string | null;
@@ -187,12 +187,12 @@ export declare class WorkoutPlansService {
             workoutPlanId: string;
         })[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
+        description: string | null;
         objective: string | null;
         personalId: string;
         isActive: boolean;
@@ -219,19 +219,19 @@ export declare class WorkoutPlansService {
     addExerciseToDay(planId: string, dayId: string, dto: AddExerciseToDayDto, currentUser: CurrentUserPayload): Promise<{
         exercise: {
             images: {
-                url: string;
                 id: string;
                 createdAt: Date;
+                url: string;
                 order: number;
                 exerciseId: string;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
+            name: string;
+            description: string | null;
             personalId: string;
             muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
             instructions: string | null;
@@ -266,19 +266,19 @@ export declare class WorkoutPlansService {
     updateExerciseOnDay(planId: string, dayId: string, workoutExId: string, dto: UpdateExerciseOnDayDto, currentUser: CurrentUserPayload): Promise<{
         exercise: {
             images: {
-                url: string;
                 id: string;
                 createdAt: Date;
+                url: string;
                 order: number;
                 exerciseId: string;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
+            name: string;
+            description: string | null;
             personalId: string;
             muscleGroup: import("@prisma/client").$Enums.MuscleGroup;
             instructions: string | null;

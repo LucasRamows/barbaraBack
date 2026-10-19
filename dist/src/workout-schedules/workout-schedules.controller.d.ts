@@ -7,8 +7,8 @@ export declare class WorkoutSchedulesController {
     constructor(service: WorkoutSchedulesService);
     create(dto: CreateWorkoutScheduleDto, user: CurrentUserPayload): Promise<{
         workoutPlan: {
-            name: string;
             id: string;
+            name: string;
         };
     } & {
         id: string;
@@ -23,8 +23,8 @@ export declare class WorkoutSchedulesController {
     }>;
     findByStudent(studentId: string, user: CurrentUserPayload): Promise<({
         workoutPlan: {
-            name: string;
             id: string;
+            name: string;
             objective: string | null;
             estimatedMinutes: number | null;
         };
@@ -41,8 +41,8 @@ export declare class WorkoutSchedulesController {
     })[]>;
     update(id: string, dto: UpdateWorkoutScheduleDto, user: CurrentUserPayload): Promise<{
         workoutPlan: {
-            name: string;
             id: string;
+            name: string;
         };
     } & {
         id: string;

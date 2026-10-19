@@ -15,8 +15,8 @@ export declare class AdminController {
     }>;
     getPersonals(): Promise<({
         user: {
-            username: string;
             id: string;
+            username: string;
             status: import("@prisma/client").$Enums.UserStatus;
             createdAt: Date;
         };
@@ -24,11 +24,11 @@ export declare class AdminController {
             students: number;
         };
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
         userId: string;
         email: string | null;
         phone: string | null;
@@ -36,8 +36,8 @@ export declare class AdminController {
         bio: string | null;
     })[]>;
     updatePersonalStatus(userId: string, dto: UpdateStatusDto): Promise<{
-        username: string;
         id: string;
+        username: string;
         status: import("@prisma/client").$Enums.UserStatus;
     }>;
 }

@@ -7,57 +7,57 @@ export declare class PersonalsController {
     private readonly personalsService;
     constructor(personalsService: PersonalsService);
     create(dto: CreatePersonalDto): Promise<{
-        personalProfile: {
-            name: string;
-            id: string;
-            email: string | null;
-            phone: string | null;
-        } | null;
-        username: string;
         id: string;
+        username: string;
         role: import("@prisma/client").$Enums.Role;
         status: import("@prisma/client").$Enums.UserStatus;
         createdAt: Date;
+        personalProfile: {
+            id: string;
+            name: string;
+            email: string | null;
+            phone: string | null;
+        } | null;
     }>;
     findAll(): Promise<{
-        personalProfile: {
-            name: string;
-            id: string;
-            email: string | null;
-            phone: string | null;
-        } | null;
-        username: string;
         id: string;
+        username: string;
         role: import("@prisma/client").$Enums.Role;
         status: import("@prisma/client").$Enums.UserStatus;
         createdAt: Date;
+        personalProfile: {
+            id: string;
+            name: string;
+            email: string | null;
+            phone: string | null;
+        } | null;
     }[]>;
     findOne(id: string): Promise<{
+        id: string;
+        username: string;
+        role: import("@prisma/client").$Enums.Role;
+        status: import("@prisma/client").$Enums.UserStatus;
+        createdAt: Date;
+        updatedAt: Date;
         personalProfile: {
-            name: string;
             id: string;
+            name: string;
             email: string | null;
             phone: string | null;
             avatarUrl: string | null;
             bio: string | null;
         } | null;
-        username: string;
-        id: string;
-        role: import("@prisma/client").$Enums.Role;
-        status: import("@prisma/client").$Enums.UserStatus;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(id: string, dto: UpdatePersonalDto): Promise<{
+        id: string;
+        username: string;
         personalProfile: {
-            name: string;
             id: string;
+            name: string;
             email: string | null;
             phone: string | null;
             bio: string | null;
         } | null;
-        username: string;
-        id: string;
     }>;
     remove(id: string): Promise<void>;
     updateStatus(id: string, dto: UpdateStatusDto): Promise<{

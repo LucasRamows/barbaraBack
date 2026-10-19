@@ -11,16 +11,16 @@ export declare class StudentsService {
     create(dto: CreateStudentDto, currentUser: CurrentUserPayload): Promise<any>;
     findAll(currentUser: CurrentUserPayload): Promise<{
         user: {
-            username: string;
             id: string;
+            username: string;
             status: import("@prisma/client").$Enums.UserStatus;
             createdAt: Date;
         };
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
         userId: string;
         email: string | null;
         phone: string | null;
@@ -36,19 +36,19 @@ export declare class StudentsService {
     }[]>;
     findOne(id: string, currentUser: CurrentUserPayload): Promise<{
         user: {
-            username: string;
             id: string;
+            username: string;
             status: import("@prisma/client").$Enums.UserStatus;
             mustChangePassword: boolean;
             createdAt: Date;
             updatedAt: Date;
         };
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
         userId: string;
         email: string | null;
         phone: string | null;
@@ -63,11 +63,11 @@ export declare class StudentsService {
         startDate: Date;
     }>;
     update(id: string, dto: UpdateStudentDto, currentUser: CurrentUserPayload): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
         userId: string;
         email: string | null;
         phone: string | null;

@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "prisma:seed": "ts-node -r tsconfig-paths/register prisma/seed.ts",
     "openapi:export": "nest start -- --export-openapi"
   },
   "dependencies": {

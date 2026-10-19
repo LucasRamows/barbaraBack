@@ -19,24 +19,24 @@ export declare class RewardAchievementsService {
         progress: {
             rule: {
                 gift: {
-                    name: string;
-                    description: string | null;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
                     deletedAt: Date | null;
+                    name: string;
+                    description: string | null;
                     personalId: string;
                     instructions: string | null;
                     isActive: boolean;
                     imageUrl: string | null;
                 } | null;
             } & {
-                name: string;
-                type: import("@prisma/client").$Enums.RewardRuleType;
-                description: string | null;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                name: string;
+                type: import("@prisma/client").$Enums.RewardRuleType;
+                description: string | null;
                 startDate: Date | null;
                 personalId: string;
                 isActive: boolean;
@@ -72,24 +72,24 @@ export declare class RewardAchievementsService {
     getProgress(studentId: string, currentUser: CurrentUserPayload): Promise<({
         rule: {
             gift: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 deletedAt: Date | null;
+                name: string;
+                description: string | null;
                 personalId: string;
                 instructions: string | null;
                 isActive: boolean;
                 imageUrl: string | null;
             } | null;
         } & {
-            name: string;
-            type: import("@prisma/client").$Enums.RewardRuleType;
-            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            type: import("@prisma/client").$Enums.RewardRuleType;
+            description: string | null;
             startDate: Date | null;
             personalId: string;
             isActive: boolean;
@@ -111,24 +111,24 @@ export declare class RewardAchievementsService {
         progress: {
             rule: {
                 gift: {
-                    name: string;
-                    description: string | null;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
                     deletedAt: Date | null;
+                    name: string;
+                    description: string | null;
                     personalId: string;
                     instructions: string | null;
                     isActive: boolean;
                     imageUrl: string | null;
                 } | null;
             } & {
-                name: string;
-                type: import("@prisma/client").$Enums.RewardRuleType;
-                description: string | null;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                name: string;
+                type: import("@prisma/client").$Enums.RewardRuleType;
+                description: string | null;
                 startDate: Date | null;
                 personalId: string;
                 isActive: boolean;

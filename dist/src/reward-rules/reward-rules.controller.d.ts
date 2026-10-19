@@ -7,24 +7,24 @@ export declare class RewardRulesController {
     constructor(rewardRulesService: RewardRulesService);
     findAll(user: CurrentUserPayload): Promise<({
         gift: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
+            name: string;
+            description: string | null;
             personalId: string;
             instructions: string | null;
             isActive: boolean;
             imageUrl: string | null;
         } | null;
     } & {
-        name: string;
-        type: import("@prisma/client").$Enums.RewardRuleType;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        type: import("@prisma/client").$Enums.RewardRuleType;
+        description: string | null;
         startDate: Date | null;
         personalId: string;
         isActive: boolean;
@@ -37,24 +37,24 @@ export declare class RewardRulesController {
     })[]>;
     create(dto: CreateRewardRuleDto, user: CurrentUserPayload): Promise<{
         gift: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
+            name: string;
+            description: string | null;
             personalId: string;
             instructions: string | null;
             isActive: boolean;
             imageUrl: string | null;
         } | null;
     } & {
-        name: string;
-        type: import("@prisma/client").$Enums.RewardRuleType;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        type: import("@prisma/client").$Enums.RewardRuleType;
+        description: string | null;
         startDate: Date | null;
         personalId: string;
         isActive: boolean;
@@ -67,24 +67,24 @@ export declare class RewardRulesController {
     }>;
     update(id: string, dto: UpdateRewardRuleDto, user: CurrentUserPayload): Promise<{
         gift: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
+            name: string;
+            description: string | null;
             personalId: string;
             instructions: string | null;
             isActive: boolean;
             imageUrl: string | null;
         } | null;
     } & {
-        name: string;
-        type: import("@prisma/client").$Enums.RewardRuleType;
-        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
+        type: import("@prisma/client").$Enums.RewardRuleType;
+        description: string | null;
         startDate: Date | null;
         personalId: string;
         isActive: boolean;

@@ -158,7 +158,6 @@ let StudentsService = class StudentsService {
         return student;
     }
     async update(id, dto, currentUser) {
-        const personal = await this.getPersonalProfile(currentUser.sub);
         await this.findOne(id, currentUser);
         return this.prisma.studentProfile.update({
             where: { id },

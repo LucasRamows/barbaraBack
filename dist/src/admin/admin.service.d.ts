@@ -12,8 +12,8 @@ export declare class AdminService {
     }>;
     getPersonals(): Promise<({
         user: {
-            username: string;
             id: string;
+            username: string;
             status: import("@prisma/client").$Enums.UserStatus;
             createdAt: Date;
         };
@@ -21,11 +21,11 @@ export declare class AdminService {
             students: number;
         };
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        name: string;
         userId: string;
         email: string | null;
         phone: string | null;
@@ -33,8 +33,8 @@ export declare class AdminService {
         bio: string | null;
     })[]>;
     updatePersonalStatus(userId: string, status: UserStatus): Promise<{
-        username: string;
         id: string;
+        username: string;
         status: import("@prisma/client").$Enums.UserStatus;
     }>;
 }

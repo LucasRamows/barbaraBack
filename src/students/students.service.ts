@@ -134,7 +134,6 @@ export class StudentsService {
   }
 
   async update(id: string, dto: UpdateStudentDto, currentUser: CurrentUserPayload) {
-    const personal = await this.getPersonalProfile(currentUser.sub);
     await this.findOne(id, currentUser); // validates existence and ownership
 
     return this.prisma.studentProfile.update({
