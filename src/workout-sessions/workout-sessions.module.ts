@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { PrismaModule } from '../prisma/prisma.module';
+import { LoadProgressionModule } from '../load-progression/load-progression.module';
+import { WorkoutSessionsController } from './workout-sessions.controller';
+import { WorkoutSessionsService } from './workout-sessions.service';
+
+@Module({
+  imports: [PrismaModule, LoadProgressionModule],
+  controllers: [WorkoutSessionsController],
+  providers: [WorkoutSessionsService],
+  exports: [WorkoutSessionsService],
+})
+export class WorkoutSessionsModule {}
