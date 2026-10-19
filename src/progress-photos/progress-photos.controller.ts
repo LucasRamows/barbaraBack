@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,8 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { PhotoPosition, Role } from '@prisma/client';
 import { memoryStorage } from 'multer';
-import { JwtAuthGuard } from '../auth/jwt.guard';
-import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
@@ -30,7 +27,6 @@ import { UploadPhotoDto } from './dto/upload-photo.dto';
 
 @ApiTags('progress-photos')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('progress-photos')
 export class ProgressPhotosController {
   constructor(private readonly service: ProgressPhotosService) {}

@@ -21,6 +21,7 @@ import { RewardRulesModule } from './reward-rules/reward-rules.module';
 import { RewardAchievementsModule } from './reward-achievements/reward-achievements.module';
 import { PlatformSettingsModule } from './platform-settings/platform-settings.module';
 import { AdminModule } from './admin/admin.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AdminModule } from './admin/admin.module';
     RewardAchievementsModule,
     PlatformSettingsModule,
     AdminModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

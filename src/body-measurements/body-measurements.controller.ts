@@ -8,12 +8,9 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/jwt.guard';
-import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
@@ -23,7 +20,6 @@ import { UpdateBodyMeasurementDto } from './dto/update-body-measurement.dto';
 
 @ApiTags('body-measurements')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('body-measurements')
 export class BodyMeasurementsController {
   constructor(private readonly service: BodyMeasurementsService) {}

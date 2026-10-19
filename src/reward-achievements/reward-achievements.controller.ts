@@ -6,13 +6,10 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RewardAchievementStatus, Role } from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { JwtAuthGuard } from '../auth/jwt.guard';
-import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
@@ -25,7 +22,6 @@ class UpdateAchievementStatusDto {
 
 @ApiTags('reward-achievements')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('reward-achievements')
 export class RewardAchievementsController {
   constructor(private readonly service: RewardAchievementsService) {}

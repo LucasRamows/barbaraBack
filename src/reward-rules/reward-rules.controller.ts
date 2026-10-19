@@ -7,12 +7,9 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/jwt.guard';
-import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
@@ -22,7 +19,6 @@ import { UpdateRewardRuleDto } from './dto/update-reward-rule.dto';
 
 @ApiTags('reward-rules')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('reward-rules')
 export class RewardRulesController {
   constructor(private readonly rewardRulesService: RewardRulesService) {}
