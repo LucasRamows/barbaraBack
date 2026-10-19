@@ -14,6 +14,8 @@ import { WorkoutSetsModule } from './workout-sets/workout-sets.module';
 import { LoadProgressionModule } from './load-progression/load-progression.module';
 import { DeloadsModule } from './deloads/deloads.module';
 import { WorkoutHistoryModule } from './workout-history/workout-history.module';
+import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
+import { ProgressPhotosModule } from './progress-photos/progress-photos.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { WorkoutHistoryModule } from './workout-history/workout-history.module';
     LoadProgressionModule,
     DeloadsModule,
     WorkoutHistoryModule,
+    BodyMeasurementsModule,
+    ProgressPhotosModule,
   ],
 })
 export class AppModule {}
