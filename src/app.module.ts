@@ -16,6 +16,11 @@ import { DeloadsModule } from './deloads/deloads.module';
 import { WorkoutHistoryModule } from './workout-history/workout-history.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 import { ProgressPhotosModule } from './progress-photos/progress-photos.module';
+import { GiftsModule } from './gifts/gifts.module';
+import { RewardRulesModule } from './reward-rules/reward-rules.module';
+import { RewardAchievementsModule } from './reward-achievements/reward-achievements.module';
+import { PlatformSettingsModule } from './platform-settings/platform-settings.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -36,6 +41,11 @@ import { ProgressPhotosModule } from './progress-photos/progress-photos.module';
     WorkoutHistoryModule,
     BodyMeasurementsModule,
     ProgressPhotosModule,
+    GiftsModule,
+    RewardRulesModule,
+    RewardAchievementsModule,
+    PlatformSettingsModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
