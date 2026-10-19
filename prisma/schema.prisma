@@ -200,6 +200,7 @@ model StudentProfile {
   workoutSchedules   WorkoutSchedule[]
   bodyMeasurements   BodyMeasurement[]
   progressPhotos     ProgressPhoto[]
+  gifts              Gift[]
   rewardProgresses   RewardProgress[]
   rewardAchievements RewardAchievement[]
   deloadPeriods      DeloadPeriod[]
@@ -325,7 +326,7 @@ model WorkoutExercise {
   restSeconds      Int            @default(60)
   rpeTarget        Int?
   notes            String?        @db.Text
-  progressionEnabled Boolean      @default(true)
+  progressionEnabled Boolean        @default(true)
 
   @@index([workoutPlanDayId])
   @@index([exerciseId])
@@ -538,6 +539,7 @@ model BodyMeasurement {
   leftThigh      Float?
   rightCalf      Float?
   leftCalf       Float?
+  neck           Float?
   notes          String?        @db.Text
   createdAt      DateTime       @default(now())
 
@@ -577,11 +579,15 @@ model Gift {
   id           String          @id @default(cuid())
   personalId   String
   personal     PersonalProfile @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  studentId    String?
+  student      StudentProfile? @relation(fields: [studentId], references: [id], onDelete: Cascade)
   name         String
   description  String?         @db.Text
   imageUrl     String?         @db.Text
   instructions String?         @db.Text
   isActive     Boolean         @default(true)
+  isDelivered  Boolean         @default(false)
+  deliveredAt  DateTime?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   deletedAt    DateTime?
@@ -589,6 +595,7 @@ model Gift {
   rewardRules RewardRule[]
 
   @@index([personalId])
+  @@index([studentId])
   @@index([deletedAt])
 }
 
@@ -644,6 +651,7 @@ model RewardAchievement {
   rejectedAt    DateTime?
   deliveredById String?
   deliveredAt   DateTime?
+  acknowledgedAt DateTime?
   notes         String?                 @db.Text
   createdAt     DateTime                @default(now())
   updatedAt     DateTime                @updatedAt

@@ -13,6 +13,25 @@ import { UpdateBodyMeasurementDto } from './dto/update-body-measurement.dto';
 export class BodyMeasurementsService {
   constructor(private prisma: PrismaService) {}
 
+  private toResponse<
+    T extends {
+      measuredAt: Date;
+      bodyFatPercent: number | null;
+      rightArm: number | null;
+      rightThigh: number | null;
+    },
+  >(measurement: T) {
+    const { measuredAt, bodyFatPercent, rightArm, rightThigh, ...rest } =
+      measurement;
+    return {
+      ...rest,
+      date: measuredAt,
+      bodyFat: bodyFatPercent,
+      arm: rightArm,
+      thigh: rightThigh,
+    };
+  }
+
   private async assertAccess(
     userId: string,
     role: Role,
@@ -32,11 +51,13 @@ export class BodyMeasurementsService {
       const personal = await this.prisma.personalProfile.findUnique({
         where: { userId, deletedAt: null },
       });
-      if (!personal) throw new ForbiddenException('Perfil de personal não encontrado.');
+      if (!personal)
+        throw new ForbiddenException('Perfil de personal não encontrado.');
       const link = await this.prisma.personalStudent.findFirst({
         where: { personalId: personal.id, studentId },
       });
-      if (!link) throw new ForbiddenException('Aluno não pertence a este personal.');
+      if (!link)
+        throw new ForbiddenException('Aluno não pertence a este personal.');
       return;
     }
 
@@ -63,39 +84,34 @@ export class BodyMeasurementsService {
   async create(dto: CreateBodyMeasurementDto, currentUser: CurrentUserPayload) {
     await this.assertAccess(currentUser.sub, currentUser.role, dto.studentId);
 
-    return this.prisma.bodyMeasurement.create({
+    const measurement = await this.prisma.bodyMeasurement.create({
       data: {
         studentId: dto.studentId,
-        measuredAt: dto.measuredAt ? new Date(dto.measuredAt) : new Date(),
+        measuredAt: dto.date ? new Date(dto.date) : new Date(),
         measuredById: currentUser.sub,
         weight: dto.weight,
         height: dto.height,
-        bodyFatPercent: dto.bodyFatPercent,
-        shoulders: dto.shoulders,
+        bodyFatPercent: dto.bodyFat,
         chest: dto.chest,
         waist: dto.waist,
-        abdomen: dto.abdomen,
         hips: dto.hips,
-        rightArm: dto.rightArm,
-        leftArm: dto.leftArm,
-        rightForearm: dto.rightForearm,
-        leftForearm: dto.leftForearm,
-        rightThigh: dto.rightThigh,
-        leftThigh: dto.leftThigh,
-        rightCalf: dto.rightCalf,
-        leftCalf: dto.leftCalf,
+        rightArm: dto.arm,
+        rightThigh: dto.thigh,
+        neck: dto.neck,
         notes: dto.notes,
       },
     });
+    return this.toResponse(measurement);
   }
 
   async findAll(studentId: string, currentUser: CurrentUserPayload) {
     await this.assertAccess(currentUser.sub, currentUser.role, studentId);
 
-    return this.prisma.bodyMeasurement.findMany({
+    const measurements = await this.prisma.bodyMeasurement.findMany({
       where: { studentId },
       orderBy: { measuredAt: 'asc' },
     });
+    return measurements.map((measurement) => this.toResponse(measurement));
   }
 
   async findOne(id: string, currentUser: CurrentUserPayload) {
@@ -104,8 +120,12 @@ export class BodyMeasurementsService {
     });
     if (!measurement) throw new NotFoundException('Medida não encontrada.');
 
-    await this.assertAccess(currentUser.sub, currentUser.role, measurement.studentId);
-    return measurement;
+    await this.assertAccess(
+      currentUser.sub,
+      currentUser.role,
+      measurement.studentId,
+    );
+    return this.toResponse(measurement);
   }
 
   async update(
@@ -115,29 +135,23 @@ export class BodyMeasurementsService {
   ) {
     await this.findOne(id, currentUser);
 
-    return this.prisma.bodyMeasurement.update({
+    const measurement = await this.prisma.bodyMeasurement.update({
       where: { id },
       data: {
-        measuredAt: dto.measuredAt ? new Date(dto.measuredAt) : undefined,
+        measuredAt: dto.date ? new Date(dto.date) : undefined,
         weight: dto.weight,
         height: dto.height,
-        bodyFatPercent: dto.bodyFatPercent,
-        shoulders: dto.shoulders,
+        bodyFatPercent: dto.bodyFat,
         chest: dto.chest,
         waist: dto.waist,
-        abdomen: dto.abdomen,
         hips: dto.hips,
-        rightArm: dto.rightArm,
-        leftArm: dto.leftArm,
-        rightForearm: dto.rightForearm,
-        leftForearm: dto.leftForearm,
-        rightThigh: dto.rightThigh,
-        leftThigh: dto.leftThigh,
-        rightCalf: dto.rightCalf,
-        leftCalf: dto.leftCalf,
+        rightArm: dto.arm,
+        rightThigh: dto.thigh,
+        neck: dto.neck,
         notes: dto.notes,
       },
     });
+    return this.toResponse(measurement);
   }
 
   async remove(id: string, currentUser: CurrentUserPayload) {

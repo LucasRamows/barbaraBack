@@ -45,10 +45,15 @@ export class WorkoutSessionsController {
   findAll(
     @CurrentUser() user: CurrentUserPayload,
     @Query('studentId') studentId?: string,
-    @Query('skip') skip?: string,
-    @Query('take') take?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.service.findAll(user, studentId, Number(skip ?? 0), Number(take ?? 20));
+    return this.service.findAll(
+      user,
+      studentId,
+      Number(page ?? 1),
+      Number(limit ?? 20),
+    );
   }
 
   @ApiOperation({ summary: 'Buscar sessão por ID' })

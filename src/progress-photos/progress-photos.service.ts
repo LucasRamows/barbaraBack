@@ -7,7 +7,26 @@ import { PhotoPosition, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
-import { UploadPhotoDto } from './dto/upload-photo.dto';
+import {
+  ProgressPhotoPositionDto,
+  UploadPhotoDto,
+} from './dto/upload-photo.dto';
+
+const apiToDatabasePosition: Record<ProgressPhotoPositionDto, PhotoPosition> = {
+  FRONT: PhotoPosition.FRONT,
+  BACK: PhotoPosition.BACK,
+  LEFT: PhotoPosition.LEFT_SIDE,
+  RIGHT: PhotoPosition.RIGHT_SIDE,
+  OTHER: PhotoPosition.FREE,
+};
+
+const databaseToApiPosition: Record<PhotoPosition, ProgressPhotoPositionDto> = {
+  FRONT: ProgressPhotoPositionDto.FRONT,
+  BACK: ProgressPhotoPositionDto.BACK,
+  LEFT_SIDE: ProgressPhotoPositionDto.LEFT,
+  RIGHT_SIDE: ProgressPhotoPositionDto.RIGHT,
+  FREE: ProgressPhotoPositionDto.OTHER,
+};
 
 @Injectable()
 export class ProgressPhotosService {
@@ -15,6 +34,35 @@ export class ProgressPhotosService {
     private prisma: PrismaService,
     private storage: StorageService,
   ) {}
+
+  private toResponse<
+    T extends {
+      takenAt: Date;
+      position: PhotoPosition;
+      observations: string | null;
+      fileUrl: string;
+      fileKey: string;
+    },
+  >(photo: T, signedUrl: string) {
+    const {
+      takenAt,
+      observations,
+      position,
+      fileUrl: _fileUrl,
+      fileKey: _fileKey,
+      ...rest
+    } = photo;
+    void _fileUrl;
+    void _fileKey;
+
+    return {
+      ...rest,
+      date: takenAt,
+      position: databaseToApiPosition[position],
+      notes: observations,
+      signedUrl,
+    };
+  }
 
   private async assertAccess(
     userId: string,
@@ -35,11 +83,13 @@ export class ProgressPhotosService {
       const personal = await this.prisma.personalProfile.findUnique({
         where: { userId, deletedAt: null },
       });
-      if (!personal) throw new ForbiddenException('Perfil de personal não encontrado.');
+      if (!personal)
+        throw new ForbiddenException('Perfil de personal não encontrado.');
       const link = await this.prisma.personalStudent.findFirst({
         where: { personalId: personal.id, studentId },
       });
-      if (!link) throw new ForbiddenException('Aluno não pertence a este personal.');
+      if (!link)
+        throw new ForbiddenException('Aluno não pertence a este personal.');
       return;
     }
 
@@ -77,23 +127,22 @@ export class ProgressPhotosService {
     const photo = await this.prisma.progressPhoto.create({
       data: {
         studentId: dto.studentId,
-        takenAt: dto.takenAt ? new Date(dto.takenAt) : new Date(),
+        takenAt: dto.date ? new Date(dto.date) : new Date(),
         fileKey: key,
         fileUrl: key,
-        position: dto.position,
-        observations: dto.observations,
+        position: apiToDatabasePosition[dto.position],
+        observations: dto.notes,
         uploadedById: currentUser.sub,
       },
     });
 
     const signedUrl = await this.storage.getSignedUrl(key);
-    const { fileUrl: _u, fileKey: _k, ...safePhoto } = photo;
-    return { ...safePhoto, signedUrl };
+    return this.toResponse(photo, signedUrl);
   }
 
   async findAll(
     studentId: string,
-    position: PhotoPosition | undefined,
+    position: ProgressPhotoPositionDto | undefined,
     currentUser: CurrentUserPayload,
   ) {
     await this.assertAccess(currentUser.sub, currentUser.role, studentId);
@@ -102,15 +151,15 @@ export class ProgressPhotosService {
       where: {
         studentId,
         deletedAt: null,
-        ...(position ? { position } : {}),
+        ...(position ? { position: apiToDatabasePosition[position] } : {}),
       },
       orderBy: { takenAt: 'asc' },
     });
 
     return Promise.all(
-      photos.map(async ({ fileUrl: _u, fileKey, ...rest }) => {
-        const signedUrl = await this.storage.getSignedUrl(fileKey);
-        return { ...rest, signedUrl };
+      photos.map(async (photo) => {
+        const signedUrl = await this.storage.getSignedUrl(photo.fileKey);
+        return this.toResponse(photo, signedUrl);
       }),
     );
   }
@@ -124,8 +173,7 @@ export class ProgressPhotosService {
     await this.assertAccess(currentUser.sub, currentUser.role, photo.studentId);
 
     const signedUrl = await this.storage.getSignedUrl(photo.fileKey);
-    const { fileUrl: _u, fileKey: _k, ...safePhoto } = photo;
-    return { ...safePhoto, signedUrl };
+    return this.toResponse(photo, signedUrl);
   }
 
   async remove(id: string, currentUser: CurrentUserPayload) {

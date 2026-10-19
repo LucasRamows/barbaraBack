@@ -34,19 +34,27 @@ export class WorkoutPlansController {
 
   @ApiOperation({ summary: 'Criar ficha de treino' })
   @Post()
-  createPlan(@Body() dto: CreateWorkoutPlanDto, @CurrentUser() user: CurrentUserPayload) {
+  createPlan(
+    @Body() dto: CreateWorkoutPlanDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
     return this.service.createPlan(dto, user);
   }
 
   @ApiOperation({ summary: 'Listar fichas do personal' })
+  @Roles(Role.PERSONAL, Role.ALUNO)
   @Get()
   findAllPlans(@CurrentUser() user: CurrentUserPayload) {
     return this.service.findAllPlans(user);
   }
 
   @ApiOperation({ summary: 'Buscar ficha com dias e exercícios' })
+  @Roles(Role.PERSONAL, Role.ALUNO)
   @Get(':id')
-  findOnePlan(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+  findOnePlan(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
     return this.service.findOnePlan(id, user);
   }
 
@@ -69,7 +77,10 @@ export class WorkoutPlansController {
 
   @ApiOperation({ summary: 'Duplicar ficha' })
   @Post(':id/duplicate')
-  duplicatePlan(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+  duplicatePlan(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
     return this.service.duplicatePlan(id, user);
   }
 
@@ -129,7 +140,13 @@ export class WorkoutPlansController {
     @Body() dto: UpdateExerciseOnDayDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.service.updateExerciseOnDay(planId, dayId, workoutExId, dto, user);
+    return this.service.updateExerciseOnDay(
+      planId,
+      dayId,
+      workoutExId,
+      dto,
+      user,
+    );
   }
 
   @ApiOperation({ summary: 'Remover exercício do dia' })

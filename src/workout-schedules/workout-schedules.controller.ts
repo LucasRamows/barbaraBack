@@ -21,19 +21,27 @@ import { UpdateWorkoutScheduleDto } from './dto/update-schedule.dto';
 
 @ApiTags('workout-schedules')
 @ApiBearerAuth()
-@Roles(Role.PERSONAL)
 @Controller('workout-schedules')
 export class WorkoutSchedulesController {
   constructor(private readonly service: WorkoutSchedulesService) {}
 
   @ApiOperation({ summary: 'Criar ou atualizar programação semanal do aluno' })
+  @Roles(Role.PERSONAL)
   @Post()
   create(@Body() dto: CreateWorkoutScheduleDto, @CurrentUser() user: CurrentUserPayload) {
     return this.service.create(dto, user);
   }
 
+  @ApiOperation({ summary: 'Programação semanal do aluno logado' })
+  @Roles(Role.ALUNO)
+  @Get('mine')
+  findMine(@CurrentUser() user: CurrentUserPayload) {
+    return this.service.findMine(user);
+  }
+
   @ApiOperation({ summary: 'Listar programação semanal do aluno' })
   @ApiQuery({ name: 'studentId', required: true })
+  @Roles(Role.PERSONAL)
   @Get()
   findByStudent(@Query('studentId') studentId: string, @CurrentUser() user: CurrentUserPayload) {
     return this.service.findByStudent(studentId, user);

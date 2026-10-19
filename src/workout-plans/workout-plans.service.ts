@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client';
 import { CurrentUserPayload } from '../auth/current-user.decorator';
 import { CreateWorkoutPlanDto } from './dto/create-plan.dto';
 import { UpdateWorkoutPlanDto } from './dto/update-plan.dto';
@@ -35,7 +36,8 @@ export class WorkoutPlansService {
     const profile = await this.prisma.personalProfile.findUnique({
       where: { userId, deletedAt: null },
     });
-    if (!profile) throw new ForbiddenException('Perfil de personal não encontrado.');
+    if (!profile)
+      throw new ForbiddenException('Perfil de personal não encontrado.');
     return profile;
   }
 
@@ -72,6 +74,24 @@ export class WorkoutPlansService {
   }
 
   async findAllPlans(currentUser: CurrentUserPayload) {
+    if (currentUser.role === Role.ALUNO) {
+      const student = await this.prisma.studentProfile.findUnique({
+        where: { userId: currentUser.sub, deletedAt: null },
+      });
+      if (!student)
+        throw new ForbiddenException('Perfil de aluno não encontrado.');
+
+      return this.prisma.workoutPlan.findMany({
+        where: {
+          deletedAt: null,
+          isActive: true,
+          personal: { students: { some: { studentId: student.id } } },
+        },
+        orderBy: { createdAt: 'desc' },
+        include: { days: DAY_WITH_EXERCISES },
+      });
+    }
+
     const personal = await this.getPersonal(currentUser.sub);
     return this.prisma.workoutPlan.findMany({
       where: { personalId: personal.id, deletedAt: null },
@@ -80,6 +100,26 @@ export class WorkoutPlansService {
   }
 
   async findOnePlan(id: string, currentUser: CurrentUserPayload) {
+    if (currentUser.role === Role.ALUNO) {
+      const student = await this.prisma.studentProfile.findUnique({
+        where: { userId: currentUser.sub, deletedAt: null },
+      });
+      if (!student)
+        throw new ForbiddenException('Perfil de aluno não encontrado.');
+
+      const plan = await this.prisma.workoutPlan.findFirst({
+        where: {
+          id,
+          deletedAt: null,
+          isActive: true,
+          personal: { students: { some: { studentId: student.id } } },
+        },
+        include: { days: DAY_WITH_EXERCISES },
+      });
+      if (!plan) throw new NotFoundException('Ficha não encontrada.');
+      return plan;
+    }
+
     const personal = await this.getPersonal(currentUser.sub);
     const plan = await this.prisma.workoutPlan.findFirst({
       where: { id, personalId: personal.id, deletedAt: null },
@@ -89,7 +129,11 @@ export class WorkoutPlansService {
     return plan;
   }
 
-  async updatePlan(id: string, dto: UpdateWorkoutPlanDto, currentUser: CurrentUserPayload) {
+  async updatePlan(
+    id: string,
+    dto: UpdateWorkoutPlanDto,
+    currentUser: CurrentUserPayload,
+  ) {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedPlan(id, personal.id);
     return this.prisma.workoutPlan.update({
@@ -171,7 +215,11 @@ export class WorkoutPlansService {
 
   // ---- DAYS ----
 
-  async createDay(planId: string, dto: CreatePlanDayDto, currentUser: CurrentUserPayload) {
+  async createDay(
+    planId: string,
+    dto: CreatePlanDayDto,
+    currentUser: CurrentUserPayload,
+  ) {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedPlan(planId, personal.id);
     return this.prisma.workoutPlanDay.create({
@@ -198,7 +246,11 @@ export class WorkoutPlansService {
     });
   }
 
-  async removeDay(planId: string, dayId: string, currentUser: CurrentUserPayload) {
+  async removeDay(
+    planId: string,
+    dayId: string,
+    currentUser: CurrentUserPayload,
+  ) {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedDay(planId, dayId, personal.id);
     await this.prisma.workoutPlanDay.delete({ where: { id: dayId } });
@@ -256,7 +308,8 @@ export class WorkoutPlansService {
     const existing = await this.prisma.workoutExercise.findFirst({
       where: { id: workoutExId, workoutPlanDayId: dayId },
     });
-    if (!existing) throw new NotFoundException('Exercício na ficha não encontrado.');
+    if (!existing)
+      throw new NotFoundException('Exercício na ficha não encontrado.');
 
     return this.prisma.workoutExercise.update({
       where: { id: workoutExId },
@@ -288,7 +341,8 @@ export class WorkoutPlansService {
     const existing = await this.prisma.workoutExercise.findFirst({
       where: { id: workoutExId, workoutPlanDayId: dayId },
     });
-    if (!existing) throw new NotFoundException('Exercício na ficha não encontrado.');
+    if (!existing)
+      throw new NotFoundException('Exercício na ficha não encontrado.');
 
     await this.prisma.workoutExercise.delete({ where: { id: workoutExId } });
   }

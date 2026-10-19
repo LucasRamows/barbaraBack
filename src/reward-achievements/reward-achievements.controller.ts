@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RewardAchievementStatus, Role } from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
@@ -61,5 +53,14 @@ export class RewardAchievementsController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.service.updateStatus(id, dto.status, user, dto.notes);
+  }
+
+  @Put(':id/acknowledge')
+  @Roles(Role.ALUNO)
+  acknowledge(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.service.acknowledge(id, user);
   }
 }

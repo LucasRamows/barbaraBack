@@ -17,13 +17,16 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PhotoPosition, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { memoryStorage } from 'multer';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
 import { ProgressPhotosService } from './progress-photos.service';
-import { UploadPhotoDto } from './dto/upload-photo.dto';
+import {
+  ProgressPhotoPositionDto,
+  UploadPhotoDto,
+} from './dto/upload-photo.dto';
 
 @ApiTags('progress-photos')
 @ApiBearerAuth()
@@ -49,7 +52,7 @@ export class ProgressPhotosController {
   @ApiOperation({ summary: 'Listar fotos de progresso de um aluno' })
   findAll(
     @Query('studentId') studentId: string,
-    @Query('position') position: PhotoPosition | undefined,
+    @Query('position') position: ProgressPhotoPositionDto | undefined,
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
     return this.service.findAll(studentId, position, currentUser);

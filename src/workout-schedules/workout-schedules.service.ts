@@ -81,6 +81,21 @@ export class WorkoutSchedulesService {
     });
   }
 
+  async findMine(currentUser: CurrentUserPayload) {
+    const profile = await this.prisma.studentProfile.findUnique({
+      where: { userId: currentUser.sub },
+    });
+    if (!profile) throw new ForbiddenException('Perfil de aluno não encontrado.');
+
+    return this.prisma.workoutSchedule.findMany({
+      where: { studentId: profile.id, isActive: true },
+      include: {
+        workoutPlan: { select: { id: true, name: true, estimatedMinutes: true, objective: true } },
+      },
+      orderBy: { dayOfWeek: 'asc' },
+    });
+  }
+
   async update(id: string, dto: UpdateWorkoutScheduleDto, currentUser: CurrentUserPayload) {
     const personal = await this.getPersonal(currentUser.sub);
     const schedule = await this.prisma.workoutSchedule.findUnique({ where: { id } });

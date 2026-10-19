@@ -1,9 +1,4 @@
-import {
-  IsDateString,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateBodyMeasurementDto {
   @IsString()
@@ -11,7 +6,7 @@ export class CreateBodyMeasurementDto {
 
   @IsOptional()
   @IsDateString()
-  measuredAt?: string;
+  date?: string;
 
   @IsOptional()
   @IsNumber()
@@ -23,11 +18,7 @@ export class CreateBodyMeasurementDto {
 
   @IsOptional()
   @IsNumber()
-  bodyFatPercent?: number;
-
-  @IsOptional()
-  @IsNumber()
-  shoulders?: number;
+  bodyFat?: number;
 
   @IsOptional()
   @IsNumber()
@@ -39,43 +30,19 @@ export class CreateBodyMeasurementDto {
 
   @IsOptional()
   @IsNumber()
-  abdomen?: number;
-
-  @IsOptional()
-  @IsNumber()
   hips?: number;
 
   @IsOptional()
   @IsNumber()
-  rightArm?: number;
+  arm?: number;
 
   @IsOptional()
   @IsNumber()
-  leftArm?: number;
+  thigh?: number;
 
   @IsOptional()
   @IsNumber()
-  rightForearm?: number;
-
-  @IsOptional()
-  @IsNumber()
-  leftForearm?: number;
-
-  @IsOptional()
-  @IsNumber()
-  rightThigh?: number;
-
-  @IsOptional()
-  @IsNumber()
-  leftThigh?: number;
-
-  @IsOptional()
-  @IsNumber()
-  rightCalf?: number;
-
-  @IsOptional()
-  @IsNumber()
-  leftCalf?: number;
+  neck?: number;
 
   @IsOptional()
   @IsString()

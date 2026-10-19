@@ -1,5 +1,12 @@
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
-import { PhotoPosition } from '@prisma/client';
+
+export enum ProgressPhotoPositionDto {
+  FRONT = 'FRONT',
+  BACK = 'BACK',
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+  OTHER = 'OTHER',
+}
 
 export class UploadPhotoDto {
   @IsString()
@@ -7,12 +14,12 @@ export class UploadPhotoDto {
 
   @IsOptional()
   @IsDateString()
-  takenAt?: string;
+  date?: string;
 
-  @IsEnum(PhotoPosition)
-  position: PhotoPosition;
+  @IsEnum(ProgressPhotoPositionDto)
+  position: ProgressPhotoPositionDto;
 
   @IsOptional()
   @IsString()
-  observations?: string;
+  notes?: string;
 }

@@ -1,9 +1,8 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateGiftDto {
-  @IsString() name: string;
+  @IsString() studentId: string;
+  @IsString() title: string;
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsString() imageUrl?: string;
-  @IsOptional() @IsString() instructions?: string;
-  @IsOptional() @IsBoolean() isActive?: boolean;
 }

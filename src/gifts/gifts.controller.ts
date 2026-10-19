@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -30,15 +31,24 @@ export class GiftsController {
   }
 
   @Get()
-  @Roles(Role.PERSONAL, Role.SUPER_ADMIN)
-  findAll(@CurrentUser() user: CurrentUserPayload) {
-    return this.giftsService.findAll(user);
+  @Roles(Role.ALUNO, Role.PERSONAL, Role.SUPER_ADMIN)
+  findAll(
+    @Query('studentId') studentId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.giftsService.findAll(studentId, user);
   }
 
   @Get(':id')
-  @Roles(Role.PERSONAL, Role.SUPER_ADMIN)
+  @Roles(Role.ALUNO, Role.PERSONAL, Role.SUPER_ADMIN)
   findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
     return this.giftsService.findOne(id, user);
+  }
+
+  @Put(':id/deliver')
+  @Roles(Role.PERSONAL)
+  deliver(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+    return this.giftsService.deliver(id, user);
   }
 
   @Put(':id')

@@ -17,37 +17,66 @@ export class GiftsService {
     const profile = await this.prisma.personalProfile.findUnique({
       where: { userId, deletedAt: null },
     });
-    if (!profile) throw new ForbiddenException('Perfil de personal não encontrado.');
+    if (!profile)
+      throw new ForbiddenException('Perfil de personal não encontrado.');
     return profile;
+  }
+
+  private async getStudentProfile(userId: string) {
+    const profile = await this.prisma.studentProfile.findUnique({
+      where: { userId, deletedAt: null },
+    });
+    if (!profile)
+      throw new ForbiddenException('Perfil de aluno não encontrado.');
+    return profile;
+  }
+
+  private async assertPersonalOwnsStudent(
+    personalId: string,
+    studentId: string,
+  ) {
+    const link = await this.prisma.personalStudent.findFirst({
+      where: { personalId, studentId },
+    });
+    if (!link)
+      throw new ForbiddenException('Aluno não pertence a este personal.');
+  }
+
+  private toResponse<T extends { name: string }>(gift: T) {
+    const { name, ...rest } = gift;
+    return { ...rest, title: name };
   }
 
   async create(dto: CreateGiftDto, currentUser: CurrentUserPayload) {
     const personal = await this.getPersonalProfile(currentUser.sub);
-    return this.prisma.gift.create({
+    await this.assertPersonalOwnsStudent(personal.id, dto.studentId);
+    const gift = await this.prisma.gift.create({
       data: {
         personalId: personal.id,
-        name: dto.name,
+        studentId: dto.studentId,
+        name: dto.title,
         description: dto.description,
         imageUrl: dto.imageUrl,
-        instructions: dto.instructions,
-        isActive: dto.isActive ?? true,
       },
     });
+    return this.toResponse(gift);
   }
 
-  async findAll(currentUser: CurrentUserPayload) {
-    if (currentUser.role === Role.SUPER_ADMIN) {
-      return this.prisma.gift.findMany({
-        where: { deletedAt: null },
-        orderBy: { createdAt: 'desc' },
-        include: { personal: { select: { id: true, name: true } } },
-      });
+  async findAll(studentId: string, currentUser: CurrentUserPayload) {
+    if (currentUser.role === Role.ALUNO) {
+      const student = await this.getStudentProfile(currentUser.sub);
+      if (student.id !== studentId)
+        throw new ForbiddenException('Acesso negado.');
+    } else if (currentUser.role === Role.PERSONAL) {
+      const personal = await this.getPersonalProfile(currentUser.sub);
+      await this.assertPersonalOwnsStudent(personal.id, studentId);
     }
-    const personal = await this.getPersonalProfile(currentUser.sub);
-    return this.prisma.gift.findMany({
-      where: { personalId: personal.id, deletedAt: null },
+
+    const gifts = await this.prisma.gift.findMany({
+      where: { studentId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
+    return gifts.map((gift) => this.toResponse(gift));
   }
 
   async findOne(id: string, currentUser: CurrentUserPayload) {
@@ -55,25 +84,46 @@ export class GiftsService {
       where: { id, deletedAt: null },
     });
     if (!gift) throw new NotFoundException('Gift não encontrado.');
-    if (currentUser.role === Role.PERSONAL) {
+    if (currentUser.role === Role.ALUNO) {
+      const student = await this.getStudentProfile(currentUser.sub);
+      if (gift.studentId !== student.id)
+        throw new ForbiddenException('Acesso negado.');
+    } else if (currentUser.role === Role.PERSONAL) {
       const personal = await this.getPersonalProfile(currentUser.sub);
       if (gift.personalId !== personal.id) throw new ForbiddenException();
     }
-    return gift;
+    return this.toResponse(gift);
   }
 
-  async update(id: string, dto: UpdateGiftDto, currentUser: CurrentUserPayload) {
+  async update(
+    id: string,
+    dto: UpdateGiftDto,
+    currentUser: CurrentUserPayload,
+  ) {
     await this.findOne(id, currentUser);
-    return this.prisma.gift.update({
+    if (dto.studentId) {
+      const personal = await this.getPersonalProfile(currentUser.sub);
+      await this.assertPersonalOwnsStudent(personal.id, dto.studentId);
+    }
+    const gift = await this.prisma.gift.update({
       where: { id },
       data: {
-        name: dto.name,
+        name: dto.title,
+        studentId: dto.studentId,
         description: dto.description,
         imageUrl: dto.imageUrl,
-        instructions: dto.instructions,
-        isActive: dto.isActive,
       },
     });
+    return this.toResponse(gift);
+  }
+
+  async deliver(id: string, currentUser: CurrentUserPayload) {
+    await this.findOne(id, currentUser);
+    const gift = await this.prisma.gift.update({
+      where: { id },
+      data: { isDelivered: true, deliveredAt: new Date() },
+    });
+    return this.toResponse(gift);
   }
 
   async remove(id: string, currentUser: CurrentUserPayload) {

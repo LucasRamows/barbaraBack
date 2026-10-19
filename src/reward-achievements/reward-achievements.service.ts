@@ -3,9 +3,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { RewardAchievementStatus, RewardRuleType, Role, WorkoutSessionStatus } from '@prisma/client';
+import {
+  Prisma,
+  RewardAchievementStatus,
+  RewardRuleType,
+  Role,
+  WorkoutSessionStatus,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CurrentUserPayload } from '../auth/current-user.decorator';
+
+type AchievementWithRule = Prisma.RewardAchievementGetPayload<{
+  include: { progress: { include: { rule: { include: { gift: true } } } } };
+}>;
+
+type ProgressWithRule = Prisma.RewardProgressGetPayload<{
+  include: {
+    rule: { include: { gift: true } };
+    achievements: { select: { createdAt: true } };
+  };
+}>;
 
 @Injectable()
 export class RewardAchievementsService {
@@ -15,7 +32,8 @@ export class RewardAchievementsService {
     const profile = await this.prisma.personalProfile.findUnique({
       where: { userId, deletedAt: null },
     });
-    if (!profile) throw new ForbiddenException('Perfil de personal não encontrado.');
+    if (!profile)
+      throw new ForbiddenException('Perfil de personal não encontrado.');
     return profile;
   }
 
@@ -23,18 +41,26 @@ export class RewardAchievementsService {
     const profile = await this.prisma.studentProfile.findUnique({
       where: { userId },
     });
-    if (!profile) throw new ForbiddenException('Perfil de aluno não encontrado.');
+    if (!profile)
+      throw new ForbiddenException('Perfil de aluno não encontrado.');
     return profile;
   }
 
-  private async assertPersonalOwnsStudent(personalId: string, studentId: string) {
+  private async assertPersonalOwnsStudent(
+    personalId: string,
+    studentId: string,
+  ) {
     const link = await this.prisma.personalStudent.findFirst({
       where: { personalId, studentId },
     });
-    if (!link) throw new ForbiddenException('Aluno não pertence a este personal.');
+    if (!link)
+      throw new ForbiddenException('Aluno não pertence a este personal.');
   }
 
-  private async assertAccess(currentUser: CurrentUserPayload, studentId: string) {
+  private async assertAccess(
+    currentUser: CurrentUserPayload,
+    studentId: string,
+  ) {
     if (currentUser.role === Role.ALUNO) {
       const student = await this.getStudentProfile(currentUser.sub);
       if (student.id !== studentId) throw new ForbiddenException();
@@ -42,6 +68,31 @@ export class RewardAchievementsService {
       const personal = await this.getPersonalProfile(currentUser.sub);
       await this.assertPersonalOwnsStudent(personal.id, studentId);
     }
+  }
+
+  private toAchievementResponse(achievement: AchievementWithRule) {
+    const rule = achievement.progress.rule;
+    return {
+      id: achievement.id,
+      studentId: achievement.studentId,
+      ruleId: rule.id,
+      rule,
+      status: achievement.acknowledgedAt ? 'ACKNOWLEDGED' : 'PENDING',
+      achievedAt: achievement.createdAt,
+      acknowledgedAt: achievement.acknowledgedAt,
+      createdAt: achievement.createdAt,
+    };
+  }
+
+  private toProgressResponse(progress: ProgressWithRule) {
+    const target = progress.rule.targetValue;
+    const isComplete = target !== null && progress.currentValue >= target;
+    const { achievements, ...rest } = progress;
+    return {
+      ...rest,
+      isComplete,
+      completedAt: isComplete ? (achievements[0]?.createdAt ?? null) : null,
+    };
   }
 
   private async calculateProgress(
@@ -55,7 +106,12 @@ export class RewardAchievementsService {
         return this.prisma.workoutSession.count({
           where: {
             studentId: studentProfileId,
-            status: { in: [WorkoutSessionStatus.COMPLETED, WorkoutSessionStatus.PARTIAL] },
+            status: {
+              in: [
+                WorkoutSessionStatus.COMPLETED,
+                WorkoutSessionStatus.PARTIAL,
+              ],
+            },
           },
         });
       }
@@ -67,7 +123,12 @@ export class RewardAchievementsService {
         const sessions = await this.prisma.workoutSession.findMany({
           where: {
             studentId: studentProfileId,
-            status: { in: [WorkoutSessionStatus.COMPLETED, WorkoutSessionStatus.PARTIAL] },
+            status: {
+              in: [
+                WorkoutSessionStatus.COMPLETED,
+                WorkoutSessionStatus.PARTIAL,
+              ],
+            },
             startedAt: { gte: twelveWeeksAgo },
           },
           select: { startedAt: true },
@@ -90,7 +151,12 @@ export class RewardAchievementsService {
         return this.prisma.workoutSession.count({
           where: {
             studentId: studentProfileId,
-            status: { in: [WorkoutSessionStatus.COMPLETED, WorkoutSessionStatus.PARTIAL] },
+            status: {
+              in: [
+                WorkoutSessionStatus.COMPLETED,
+                WorkoutSessionStatus.PARTIAL,
+              ],
+            },
             startedAt: { gte: startOfMonth },
           },
         });
@@ -125,7 +191,12 @@ export class RewardAchievementsService {
       where: { personalId: personal.id, isActive: true },
     });
 
-    const results: Array<{ ruleId: string; currentValue: number; targetValue: number | null; isComplete: boolean }> = [];
+    const results: Array<{
+      ruleId: string;
+      currentValue: number;
+      targetValue: number | null;
+      isComplete: boolean;
+    }> = [];
 
     for (const rule of rules) {
       const currentValue = await this.calculateProgress(rule.type, studentId);
@@ -136,12 +207,24 @@ export class RewardAchievementsService {
         update: { currentValue },
       });
 
-      const isComplete = rule.targetValue !== null && currentValue >= rule.targetValue;
+      const isComplete =
+        rule.targetValue !== null && currentValue >= rule.targetValue;
 
       if (isComplete) {
         const progress = await this.prisma.rewardProgress.findUnique({
           where: { studentId_ruleId: { studentId, ruleId: rule.id } },
-          include: { achievements: { where: { status: { notIn: [RewardAchievementStatus.REJECTED, RewardAchievementStatus.CANCELLED] } } } },
+          include: {
+            achievements: {
+              where: {
+                status: {
+                  notIn: [
+                    RewardAchievementStatus.REJECTED,
+                    RewardAchievementStatus.CANCELLED,
+                  ],
+                },
+              },
+            },
+          },
         });
 
         if (progress && progress.achievements.length === 0) {
@@ -157,7 +240,12 @@ export class RewardAchievementsService {
         }
       }
 
-      results.push({ ruleId: rule.id, currentValue, targetValue: rule.targetValue, isComplete });
+      results.push({
+        ruleId: rule.id,
+        currentValue,
+        targetValue: rule.targetValue,
+        isComplete,
+      });
     }
 
     return results;
@@ -165,7 +253,7 @@ export class RewardAchievementsService {
 
   async findAchievements(studentId: string, currentUser: CurrentUserPayload) {
     await this.assertAccess(currentUser, studentId);
-    return this.prisma.rewardAchievement.findMany({
+    const achievements = await this.prisma.rewardAchievement.findMany({
       where: { studentId },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -174,15 +262,46 @@ export class RewardAchievementsService {
         },
       },
     });
+    return achievements.map((achievement) =>
+      this.toAchievementResponse(achievement),
+    );
   }
 
   async getProgress(studentId: string, currentUser: CurrentUserPayload) {
     await this.assertAccess(currentUser, studentId);
-    return this.prisma.rewardProgress.findMany({
+    const progress = await this.prisma.rewardProgress.findMany({
       where: { studentId },
-      include: { rule: { include: { gift: true } } },
+      include: {
+        rule: { include: { gift: true } },
+        achievements: {
+          select: { createdAt: true },
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
+      },
       orderBy: { updatedAt: 'desc' },
     });
+    return progress.map((item) => this.toProgressResponse(item));
+  }
+
+  async acknowledge(id: string, currentUser: CurrentUserPayload) {
+    const achievement = await this.prisma.rewardAchievement.findUnique({
+      where: { id },
+      include: { progress: { include: { rule: { include: { gift: true } } } } },
+    });
+    if (!achievement) throw new NotFoundException('Conquista não encontrada.');
+
+    const student = await this.getStudentProfile(currentUser.sub);
+    if (achievement.studentId !== student.id) {
+      throw new ForbiddenException('Acesso negado.');
+    }
+
+    const updated = await this.prisma.rewardAchievement.update({
+      where: { id },
+      data: { acknowledgedAt: new Date() },
+      include: { progress: { include: { rule: { include: { gift: true } } } } },
+    });
+    return this.toAchievementResponse(updated);
   }
 
   async updateStatus(
@@ -202,7 +321,8 @@ export class RewardAchievementsService {
       if (achievement.studentId !== student.id) throw new ForbiddenException();
     } else if (currentUser.role === Role.PERSONAL) {
       const personal = await this.getPersonalProfile(currentUser.sub);
-      if (achievement.progress.rule.personalId !== personal.id) throw new ForbiddenException();
+      if (achievement.progress.rule.personalId !== personal.id)
+        throw new ForbiddenException();
     }
 
     const now = new Date();

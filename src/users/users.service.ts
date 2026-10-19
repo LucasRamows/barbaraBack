@@ -1,7 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CurrentUserPayload } from '../auth/current-user.decorator';
+import { Role } from '@prisma/client';
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -45,7 +51,40 @@ export class UsersService {
     return user;
   }
 
-  async changePassword(currentUser: CurrentUserPayload, currentPassword: string, newPassword: string) {
+  async updateMyProfile(
+    currentUser: CurrentUserPayload,
+    dto: UpdateMyProfileDto,
+  ) {
+    if (currentUser.role === Role.ALUNO) {
+      return this.prisma.studentProfile.update({
+        where: { userId: currentUser.sub },
+        data: {
+          name: dto.name,
+          email: dto.email || null,
+          phone: dto.phone || null,
+        },
+      });
+    }
+
+    if (currentUser.role === Role.PERSONAL) {
+      return this.prisma.personalProfile.update({
+        where: { userId: currentUser.sub },
+        data: {
+          name: dto.name,
+          email: dto.email || null,
+          phone: dto.phone || null,
+        },
+      });
+    }
+
+    throw new BadRequestException('Este usuário não possui perfil editável.');
+  }
+
+  async changePassword(
+    currentUser: CurrentUserPayload,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { id: currentUser.sub },
       select: { id: true, passwordHash: true },

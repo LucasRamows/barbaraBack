@@ -22,20 +22,26 @@ export class WorkoutSessionsService {
     const profile = await this.prisma.studentProfile.findUnique({
       where: { userId },
     });
-    if (!profile) throw new ForbiddenException('Perfil de aluno não encontrado.');
+    if (!profile)
+      throw new ForbiddenException('Perfil de aluno não encontrado.');
     return profile;
   }
 
-  private async assertPersonalOwnsStudent(personalUserId: string, studentId: string) {
+  private async assertPersonalOwnsStudent(
+    personalUserId: string,
+    studentId: string,
+  ) {
     const personal = await this.prisma.personalProfile.findUnique({
       where: { userId: personalUserId, deletedAt: null },
     });
-    if (!personal) throw new ForbiddenException('Perfil de personal não encontrado.');
+    if (!personal)
+      throw new ForbiddenException('Perfil de personal não encontrado.');
 
     const link = await this.prisma.personalStudent.findFirst({
       where: { personalId: personal.id, studentId },
     });
-    if (!link) throw new ForbiddenException('Aluno não pertence a este personal.');
+    if (!link)
+      throw new ForbiddenException('Aluno não pertence a este personal.');
     return personal;
   }
 
@@ -43,9 +49,13 @@ export class WorkoutSessionsService {
     const student = await this.getStudentProfile(currentUser.sub);
 
     const active = await this.prisma.workoutSession.findFirst({
-      where: { studentId: student.id, status: WorkoutSessionStatus.IN_PROGRESS },
+      where: {
+        studentId: student.id,
+        status: WorkoutSessionStatus.IN_PROGRESS,
+      },
     });
-    if (active) throw new ConflictException('Você já tem um treino em andamento.');
+    if (active)
+      throw new ConflictException('Você já tem um treino em andamento.');
 
     const planDay = await this.prisma.workoutPlanDay.findUnique({
       where: { id: dto.workoutPlanDayId },
@@ -64,6 +74,32 @@ export class WorkoutSessionsService {
 
     if (!planDay || planDay.workoutPlanId !== dto.workoutPlanId) {
       throw new NotFoundException('Dia de treino não encontrado.');
+    }
+
+    const link = await this.prisma.personalStudent.findFirst({
+      where: {
+        studentId: student.id,
+        personalId: planDay.workoutPlan.personalId,
+      },
+    });
+    if (
+      !link ||
+      !planDay.workoutPlan.isActive ||
+      planDay.workoutPlan.deletedAt
+    ) {
+      throw new ForbiddenException('Ficha não disponível para este aluno.');
+    }
+
+    if (dto.scheduledPlanId) {
+      const schedule = await this.prisma.workoutSchedule.findFirst({
+        where: {
+          id: dto.scheduledPlanId,
+          studentId: student.id,
+          workoutPlanId: dto.workoutPlanId,
+          isActive: true,
+        },
+      });
+      if (!schedule) throw new ForbiddenException('Agendamento inválido.');
     }
 
     const now = new Date();
@@ -161,7 +197,10 @@ export class WorkoutSessionsService {
     const student = await this.getStudentProfile(currentUser.sub);
 
     const session = await this.prisma.workoutSession.findFirst({
-      where: { studentId: student.id, status: WorkoutSessionStatus.IN_PROGRESS },
+      where: {
+        studentId: student.id,
+        status: WorkoutSessionStatus.IN_PROGRESS,
+      },
       include: {
         exercises: {
           orderBy: { order: 'asc' },
@@ -178,8 +217,8 @@ export class WorkoutSessionsService {
   async findAll(
     currentUser: CurrentUserPayload,
     studentId?: string,
-    skip = 0,
-    take = 20,
+    page = 1,
+    limit = 20,
   ) {
     let targetStudentId: string;
 
@@ -187,32 +226,47 @@ export class WorkoutSessionsService {
       const student = await this.getStudentProfile(currentUser.sub);
       targetStudentId = student.id;
     } else {
-      if (!studentId) throw new ForbiddenException('studentId obrigatório para personal.');
+      if (!studentId)
+        throw new ForbiddenException('studentId obrigatório para personal.');
       await this.assertPersonalOwnsStudent(currentUser.sub, studentId);
       targetStudentId = studentId;
     }
 
-    const sessions = await this.prisma.workoutSession.findMany({
-      where: { studentId: targetStudentId },
-      select: {
-        id: true,
-        startedAt: true,
-        finishedAt: true,
-        status: true,
-        durationSeconds: true,
-        isDeload: true,
-        partialReason: true,
-        planSnapshot: true,
-      },
-      orderBy: { startedAt: 'desc' },
-      skip,
-      take,
-    });
+    const safePage = Number.isInteger(page) && page > 0 ? page : 1;
+    const safeLimit = Number.isInteger(limit)
+      ? Math.min(Math.max(limit, 1), 100)
+      : 20;
+    const where = { studentId: targetStudentId };
+    const [sessions, total] = await this.prisma.$transaction([
+      this.prisma.workoutSession.findMany({
+        where,
+        select: {
+          id: true,
+          startedAt: true,
+          finishedAt: true,
+          status: true,
+          durationSeconds: true,
+          isDeload: true,
+          partialReason: true,
+          planSnapshot: true,
+        },
+        orderBy: { startedAt: 'desc' },
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
+      }),
+      this.prisma.workoutSession.count({ where }),
+    ]);
 
-    return sessions.map((s) => ({
-      ...s,
-      planName: (s.planSnapshot as { planName?: string })?.planName ?? null,
-    }));
+    return {
+      data: sessions.map((session) => ({
+        ...session,
+        planName:
+          (session.planSnapshot as { planName?: string })?.planName ?? null,
+      })),
+      total,
+      page: safePage,
+      limit: safeLimit,
+    };
   }
 
   async findOne(id: string, currentUser: CurrentUserPayload) {
@@ -232,7 +286,8 @@ export class WorkoutSessionsService {
 
     if (currentUser.role === Role.ALUNO) {
       const student = await this.getStudentProfile(currentUser.sub);
-      if (session.studentId !== student.id) throw new ForbiddenException('Acesso negado.');
+      if (session.studentId !== student.id)
+        throw new ForbiddenException('Acesso negado.');
     } else if (currentUser.role === Role.PERSONAL) {
       await this.assertPersonalOwnsStudent(currentUser.sub, session.studentId);
     }
@@ -240,25 +295,36 @@ export class WorkoutSessionsService {
     return session;
   }
 
-  async finish(id: string, dto: FinishSessionDto, currentUser: CurrentUserPayload) {
+  async finish(
+    id: string,
+    dto: FinishSessionDto,
+    currentUser: CurrentUserPayload,
+  ) {
     const student = await this.getStudentProfile(currentUser.sub);
 
-    const session = await this.prisma.workoutSession.findUnique({ where: { id } });
+    const session = await this.prisma.workoutSession.findUnique({
+      where: { id },
+    });
     if (!session) throw new NotFoundException('Sessão não encontrada.');
-    if (session.studentId !== student.id) throw new ForbiddenException('Acesso negado.');
+    if (session.studentId !== student.id)
+      throw new ForbiddenException('Acesso negado.');
     if (session.status !== WorkoutSessionStatus.IN_PROGRESS) {
       throw new ConflictException('Esta sessão não está em andamento.');
     }
 
     const now = new Date();
-    const durationSeconds = Math.floor((now.getTime() - session.startedAt.getTime()) / 1000);
+    const durationSeconds = Math.floor(
+      (now.getTime() - session.startedAt.getTime()) / 1000,
+    );
 
     const updated = await this.prisma.workoutSession.update({
       where: { id },
       data: {
         finishedAt: now,
         durationSeconds,
-        status: dto.isPartial ? WorkoutSessionStatus.PARTIAL : WorkoutSessionStatus.COMPLETED,
+        status: dto.isPartial
+          ? WorkoutSessionStatus.PARTIAL
+          : WorkoutSessionStatus.COMPLETED,
         partialReason: dto.isPartial ? dto.partialReason : null,
       },
     });
@@ -271,9 +337,12 @@ export class WorkoutSessionsService {
   async abandonSession(id: string, currentUser: CurrentUserPayload) {
     const student = await this.getStudentProfile(currentUser.sub);
 
-    const session = await this.prisma.workoutSession.findUnique({ where: { id } });
+    const session = await this.prisma.workoutSession.findUnique({
+      where: { id },
+    });
     if (!session) throw new NotFoundException('Sessão não encontrada.');
-    if (session.studentId !== student.id) throw new ForbiddenException('Acesso negado.');
+    if (session.studentId !== student.id)
+      throw new ForbiddenException('Acesso negado.');
 
     await this.prisma.workoutSession.update({
       where: { id },
