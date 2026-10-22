@@ -6,7 +6,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -24,6 +30,11 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Autenticar usuário' })
+  @ApiOkResponse({
+    description: 'Tokens e identidade resumida do usuário autenticado.',
+  })
+  @ApiBadRequestResponse({ description: 'Payload fora dos limites do contrato.' })
+  @ApiUnauthorizedResponse({ description: 'Credenciais inválidas.' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -32,6 +43,9 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renovar access token' })
+  @ApiOkResponse({ description: 'Novo par de tokens.' })
+  @ApiBadRequestResponse({ description: 'Refresh token ausente ou inválido.' })
+  @ApiUnauthorizedResponse({ description: 'Refresh token expirado ou revogado.' })
   refresh(@Body() dto: RefreshDto) {
     return this.authService.refresh(dto.refreshToken);
   }

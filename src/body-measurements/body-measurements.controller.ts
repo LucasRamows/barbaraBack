@@ -44,6 +44,18 @@ export class BodyMeasurementsController {
     return this.service.findAll(studentId, currentUser);
   }
 
+  @Get('progress')
+  @Roles(Role.ALUNO, Role.PERSONAL, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Resumo de evolução corporal e cadência de treinos' })
+  getProgress(
+    @Query('studentId') studentId: string,
+    @Query('from') from: string | undefined,
+    @Query('to') to: string | undefined,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.service.getProgress(studentId, from, to, currentUser);
+  }
+
   @Get(':id')
   @Roles(Role.ALUNO, Role.PERSONAL, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Buscar uma medida corporal por ID' })

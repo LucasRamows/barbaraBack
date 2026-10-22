@@ -8,6 +8,9 @@ import { PrismaService } from '../prisma/prisma.service';
 const mockUser = {
   id: 'user-1',
   username: 'aluno1',
+  usernameNormalized: 'aluno1',
+  email: 'aluno@example.com',
+  emailNormalized: 'aluno@example.com',
   passwordHash: bcrypt.hashSync('senha123', 10),
   role: Role.ALUNO,
   status: UserStatus.ACTIVE,
@@ -54,43 +57,96 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('returns tokens for valid credentials', async () => {
+    it('authenticates with legacy username field', async () => {
       prismaMock.user.findFirst.mockResolvedValue(mockUser);
       prismaMock.refreshToken.create.mockResolvedValue({ token: 'rt' });
 
       const result = await service.login({ username: 'aluno1', password: 'senha123' });
 
+      expect(prismaMock.user.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { username: 'aluno1' },
+              { usernameNormalized: 'aluno1' },
+            ]),
+          }),
+        }),
+      );
       expect(result.accessToken).toBeDefined();
       expect(result.refreshToken).toBeDefined();
-      expect(result.user.role).toBe(Role.ALUNO);
+      expect(result.user.username).toBe('aluno1');
     });
 
-    it('throws UnauthorizedException for wrong password', async () => {
+    it('authenticates with identifier field using username', async () => {
+      prismaMock.user.findFirst.mockResolvedValue(mockUser);
+      prismaMock.refreshToken.create.mockResolvedValue({ token: 'rt' });
+
+      const result = await service.login({ identifier: 'aluno1', password: 'senha123' });
+
+      expect(result.accessToken).toBeDefined();
+      expect(result.user.username).toBe('aluno1');
+    });
+
+    it('authenticates with identifier field using email (case-insensitive)', async () => {
+      prismaMock.user.findFirst.mockResolvedValue(mockUser);
+      prismaMock.refreshToken.create.mockResolvedValue({ token: 'rt' });
+
+      const result = await service.login({ identifier: '  Aluno@Example.COM ', password: 'senha123' });
+
+      expect(prismaMock.user.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { emailNormalized: 'aluno@example.com' },
+            ]),
+          }),
+        }),
+      );
+      expect(result.accessToken).toBeDefined();
+      expect(result.user.username).toBe('aluno1');
+    });
+
+    it('authenticates with legacy username field holding an email', async () => {
+      prismaMock.user.findFirst.mockResolvedValue(mockUser);
+      prismaMock.refreshToken.create.mockResolvedValue({ token: 'rt' });
+
+      const result = await service.login({ username: 'Aluno@Example.COM', password: 'senha123' });
+
+      expect(result.accessToken).toBeDefined();
+      expect(result.user.username).toBe('aluno1');
+    });
+
+    it('preserves generic error message to prevent user enumeration on wrong password', async () => {
       prismaMock.user.findFirst.mockResolvedValue(mockUser);
 
-      await expect(service.login({ username: 'aluno1', password: 'errada' }))
-        .rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(service.login({ identifier: 'aluno1', password: 'wrong' })).rejects.toThrow(
+        'Usuário ou senha inválidos.',
+      );
     });
 
-    it('throws UnauthorizedException for unknown user', async () => {
+    it('preserves generic error message to prevent user enumeration on non-existent user', async () => {
       prismaMock.user.findFirst.mockResolvedValue(null);
 
-      await expect(service.login({ username: 'naoexiste', password: 'qualquer' }))
-        .rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(service.login({ identifier: 'unknown@user.com', password: 'any' })).rejects.toThrow(
+        'Usuário ou senha inválidos.',
+      );
     });
 
     it('throws ForbiddenException for inactive user', async () => {
       prismaMock.user.findFirst.mockResolvedValue({ ...mockUser, status: UserStatus.INACTIVE });
 
-      await expect(service.login({ username: 'aluno1', password: 'senha123' }))
-        .rejects.toBeInstanceOf(ForbiddenException);
+      await expect(service.login({ identifier: 'aluno1', password: 'senha123' })).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
     });
 
     it('throws ForbiddenException for blocked user', async () => {
       prismaMock.user.findFirst.mockResolvedValue({ ...mockUser, status: UserStatus.BLOCKED });
 
-      await expect(service.login({ username: 'aluno1', password: 'senha123' }))
-        .rejects.toBeInstanceOf(ForbiddenException);
+      await expect(service.login({ identifier: 'aluno1', password: 'senha123' })).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
     });
   });
 

@@ -1,0 +1,3833 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens e identidade resumida do usuário autenticado."
+          },
+          "400": {
+            "description": "Payload fora dos limites do contrato."
+          },
+          "401": {
+            "description": "Credenciais inválidas."
+          }
+        },
+        "summary": "Autenticar usuário",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Novo par de tokens."
+          },
+          "400": {
+            "description": "Refresh token ausente ou inválido."
+          },
+          "401": {
+            "description": "Refresh token expirado ou revogado."
+          }
+        },
+        "summary": "Renovar access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Encerrar sessão",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retorna dados do usuário autenticado",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/profile": {
+      "patch": {
+        "operationId": "UsersController_updateMyProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Payload fora dos limites do contrato."
+          },
+          "409": {
+            "description": "E-mail ou CPF/CNPJ já cadastrado."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar o próprio perfil",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/password": {
+      "patch": {
+        "operationId": "UsersController_patchPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Trocar senha do usuário autenticado",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/change-password": {
+      "put": {
+        "operationId": "UsersController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Trocar senha do usuário autenticado",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/personals": {
+      "post": {
+        "operationId": "PersonalsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePersonalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Payload fora dos limites do contrato."
+          },
+          "409": {
+            "description": "Username, e-mail ou CPF/CNPJ já cadastrado."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cadastrar personal (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      },
+      "get": {
+        "operationId": "PersonalsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar personals (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      }
+    },
+    "/api/personals/{id}": {
+      "get": {
+        "operationId": "PersonalsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalhar personal (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      },
+      "put": {
+        "operationId": "PersonalsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePersonalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Payload fora dos limites do contrato."
+          },
+          "409": {
+            "description": "E-mail ou CPF/CNPJ já cadastrado."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar personal (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      },
+      "delete": {
+        "operationId": "PersonalsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Excluir personal logicamente (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      }
+    },
+    "/api/personals/{id}/status": {
+      "put": {
+        "operationId": "PersonalsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bloquear/ativar personal (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      }
+    },
+    "/api/personals/{id}/reset-password": {
+      "put": {
+        "operationId": "PersonalsController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Redefinir senha do personal (SUPER_ADMIN)",
+        "tags": [
+          "personals"
+        ]
+      }
+    },
+    "/api/students": {
+      "post": {
+        "operationId": "StudentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStudentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Campos ou data inválidos."
+          },
+          "409": {
+            "description": "Username, e-mail ou CPF/CNPJ já cadastrado."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cadastrar aluno (PERSONAL)",
+        "tags": [
+          "students"
+        ]
+      },
+      "get": {
+        "operationId": "StudentsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar alunos do personal",
+        "tags": [
+          "students"
+        ]
+      }
+    },
+    "/api/students/{id}": {
+      "get": {
+        "operationId": "StudentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Aluno sem vínculo com o personal."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalhar aluno",
+        "tags": [
+          "students"
+        ]
+      },
+      "put": {
+        "operationId": "StudentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStudentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Campos ou data inválidos."
+          },
+          "403": {
+            "description": "Aluno sem vínculo com o personal."
+          },
+          "409": {
+            "description": "E-mail ou CPF/CNPJ já cadastrado."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar aluno",
+        "tags": [
+          "students"
+        ]
+      },
+      "delete": {
+        "operationId": "StudentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Excluir aluno logicamente",
+        "tags": [
+          "students"
+        ]
+      }
+    },
+    "/api/students/{id}/status": {
+      "put": {
+        "operationId": "StudentsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bloquear/ativar aluno",
+        "tags": [
+          "students"
+        ]
+      }
+    },
+    "/api/students/{id}/reset-password": {
+      "put": {
+        "operationId": "StudentsController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Redefinir senha do aluno",
+        "tags": [
+          "students"
+        ]
+      }
+    },
+    "/api/exercises": {
+      "post": {
+        "operationId": "ExercisesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExerciseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar exercício",
+        "tags": [
+          "exercises"
+        ]
+      },
+      "get": {
+        "operationId": "ExercisesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar exercícios do personal",
+        "tags": [
+          "exercises"
+        ]
+      }
+    },
+    "/api/exercises/{id}": {
+      "get": {
+        "operationId": "ExercisesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar exercício por ID",
+        "tags": [
+          "exercises"
+        ]
+      },
+      "put": {
+        "operationId": "ExercisesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExerciseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar exercício",
+        "tags": [
+          "exercises"
+        ]
+      },
+      "delete": {
+        "operationId": "ExercisesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover exercício (exclusão lógica)",
+        "tags": [
+          "exercises"
+        ]
+      }
+    },
+    "/api/exercises/{id}/images": {
+      "post": {
+        "operationId": "ExercisesController_addImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adicionar imagem ao exercício",
+        "tags": [
+          "exercises"
+        ]
+      }
+    },
+    "/api/exercises/{id}/images/{imageId}": {
+      "delete": {
+        "operationId": "ExercisesController_removeImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "imageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover imagem do exercício",
+        "tags": [
+          "exercises"
+        ]
+      }
+    },
+    "/api/workout-plans": {
+      "post": {
+        "operationId": "WorkoutPlansController_createPlan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkoutPlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar ficha de treino",
+        "tags": [
+          "workout-plans"
+        ]
+      },
+      "get": {
+        "operationId": "WorkoutPlansController_findAllPlans",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar fichas do personal",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}": {
+      "get": {
+        "operationId": "WorkoutPlansController_findOnePlan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar ficha com dias e exercícios",
+        "tags": [
+          "workout-plans"
+        ]
+      },
+      "put": {
+        "operationId": "WorkoutPlansController_updatePlan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkoutPlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar ficha",
+        "tags": [
+          "workout-plans"
+        ]
+      },
+      "delete": {
+        "operationId": "WorkoutPlansController_removePlan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover ficha (exclusão lógica)",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}/duplicate": {
+      "post": {
+        "operationId": "WorkoutPlansController_duplicatePlan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Duplicar ficha",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}/days": {
+      "post": {
+        "operationId": "WorkoutPlansController_createDay",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanDayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adicionar dia à ficha",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}/days/{dayId}": {
+      "put": {
+        "operationId": "WorkoutPlansController_updateDay",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanDayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar dia",
+        "tags": [
+          "workout-plans"
+        ]
+      },
+      "delete": {
+        "operationId": "WorkoutPlansController_removeDay",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover dia",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}/days/{dayId}/exercises": {
+      "post": {
+        "operationId": "WorkoutPlansController_addExercise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddExerciseToDayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adicionar exercício ao dia",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}/days/{dayId}/exercises/{workoutExId}": {
+      "put": {
+        "operationId": "WorkoutPlansController_updateExercise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workoutExId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExerciseOnDayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar exercício no dia",
+        "tags": [
+          "workout-plans"
+        ]
+      },
+      "delete": {
+        "operationId": "WorkoutPlansController_removeExercise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workoutExId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover exercício do dia",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-plans/{id}/days/{dayId}/exercises/reorder": {
+      "put": {
+        "operationId": "WorkoutPlansController_reorderExercises",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dayId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderExercisesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reordenar exercícios do dia",
+        "tags": [
+          "workout-plans"
+        ]
+      }
+    },
+    "/api/workout-schedules": {
+      "post": {
+        "operationId": "WorkoutSchedulesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkoutScheduleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar ou atualizar programação semanal do aluno",
+        "tags": [
+          "workout-schedules"
+        ]
+      },
+      "get": {
+        "operationId": "WorkoutSchedulesController_findByStudent",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar programação semanal do aluno",
+        "tags": [
+          "workout-schedules"
+        ]
+      }
+    },
+    "/api/workout-schedules/mine": {
+      "get": {
+        "operationId": "WorkoutSchedulesController_findMine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Programação semanal do aluno logado",
+        "tags": [
+          "workout-schedules"
+        ]
+      }
+    },
+    "/api/workout-schedules/mine/week": {
+      "get": {
+        "operationId": "WorkoutSchedulesController_findMyWeek",
+        "parameters": [
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "Uma data da semana desejada no formato YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Agenda semanal detalhada do aluno logado, com exercícios e cargas",
+        "tags": [
+          "workout-schedules"
+        ]
+      }
+    },
+    "/api/workout-schedules/{id}": {
+      "put": {
+        "operationId": "WorkoutSchedulesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkoutScheduleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar programação",
+        "tags": [
+          "workout-schedules"
+        ]
+      },
+      "delete": {
+        "operationId": "WorkoutSchedulesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover treino da semana e cancelar eventual sessão em andamento",
+        "tags": [
+          "workout-schedules"
+        ]
+      }
+    },
+    "/api/workout-sessions/active": {
+      "get": {
+        "operationId": "WorkoutSessionsController_findActive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar sessão ativa do aluno",
+        "tags": [
+          "workout-sessions"
+        ]
+      }
+    },
+    "/api/workout-sessions/start": {
+      "post": {
+        "operationId": "WorkoutSessionsController_start",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Iniciar sessão de treino",
+        "tags": [
+          "workout-sessions"
+        ]
+      }
+    },
+    "/api/workout-sessions": {
+      "get": {
+        "operationId": "WorkoutSessionsController_findAll",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar histórico de sessões",
+        "tags": [
+          "workout-sessions"
+        ]
+      }
+    },
+    "/api/workout-sessions/{id}": {
+      "get": {
+        "operationId": "WorkoutSessionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar sessão por ID",
+        "tags": [
+          "workout-sessions"
+        ]
+      },
+      "delete": {
+        "operationId": "WorkoutSessionsController_abandon",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Abandonar sessão de treino",
+        "tags": [
+          "workout-sessions"
+        ]
+      }
+    },
+    "/api/workout-sessions/{id}/finish": {
+      "put": {
+        "operationId": "WorkoutSessionsController_finish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Finalizar sessão de treino",
+        "tags": [
+          "workout-sessions"
+        ]
+      }
+    },
+    "/api/workout-sessions/{id}/history": {
+      "delete": {
+        "operationId": "WorkoutSessionsController_removeFromHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marcar treino como não realizado e remover seu histórico",
+        "tags": [
+          "workout-sessions"
+        ]
+      }
+    },
+    "/api/load-progression/suggestions": {
+      "get": {
+        "operationId": "LoadProgressionController_getSuggestions",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar sugestões de progressão pendentes",
+        "tags": [
+          "load-progression"
+        ]
+      }
+    },
+    "/api/load-progression/suggestions/{id}": {
+      "put": {
+        "operationId": "LoadProgressionController_respondSuggestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondSuggestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aceitar ou rejeitar sugestão de progressão",
+        "tags": [
+          "load-progression"
+        ]
+      }
+    },
+    "/api/workout-sets/{setId}": {
+      "put": {
+        "operationId": "WorkoutSetsController_update",
+        "parameters": [
+          {
+            "name": "setId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkoutSetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar série executada",
+        "tags": [
+          "workout-sets"
+        ]
+      }
+    },
+    "/api/workout-sets/{sessionExerciseId}/extra": {
+      "post": {
+        "operationId": "WorkoutSetsController_addExtraSet",
+        "parameters": [
+          {
+            "name": "sessionExerciseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adicionar série extra ao exercício",
+        "tags": [
+          "workout-sets"
+        ]
+      }
+    },
+    "/api/deloads": {
+      "post": {
+        "operationId": "DeloadsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeloadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar período de deload",
+        "tags": [
+          "deloads"
+        ]
+      },
+      "get": {
+        "operationId": "DeloadsController_findAll",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar períodos de deload",
+        "tags": [
+          "deloads"
+        ]
+      }
+    },
+    "/api/deloads/{id}": {
+      "put": {
+        "operationId": "DeloadsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeloadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar período de deload",
+        "tags": [
+          "deloads"
+        ]
+      },
+      "delete": {
+        "operationId": "DeloadsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover período de deload",
+        "tags": [
+          "deloads"
+        ]
+      }
+    },
+    "/api/workout-history/exercise": {
+      "get": {
+        "operationId": "WorkoutHistoryController_getExerciseHistory",
+        "parameters": [
+          {
+            "name": "exerciseId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Histórico de carga de um exercício",
+        "tags": [
+          "workout-history"
+        ]
+      }
+    },
+    "/api/body-measurements": {
+      "post": {
+        "operationId": "BodyMeasurementsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBodyMeasurementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar medidas corporais de um aluno",
+        "tags": [
+          "body-measurements"
+        ]
+      },
+      "get": {
+        "operationId": "BodyMeasurementsController_findAll",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar medidas corporais de um aluno",
+        "tags": [
+          "body-measurements"
+        ]
+      }
+    },
+    "/api/body-measurements/{id}": {
+      "get": {
+        "operationId": "BodyMeasurementsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar uma medida corporal por ID",
+        "tags": [
+          "body-measurements"
+        ]
+      },
+      "put": {
+        "operationId": "BodyMeasurementsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBodyMeasurementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar medida corporal",
+        "tags": [
+          "body-measurements"
+        ]
+      },
+      "delete": {
+        "operationId": "BodyMeasurementsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover medida corporal",
+        "tags": [
+          "body-measurements"
+        ]
+      }
+    },
+    "/api/progress-photos": {
+      "post": {
+        "operationId": "ProgressPhotosController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadPhotoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload de foto de progresso de um aluno",
+        "tags": [
+          "progress-photos"
+        ]
+      },
+      "get": {
+        "operationId": "ProgressPhotosController_findAll",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar fotos de progresso de um aluno",
+        "tags": [
+          "progress-photos"
+        ]
+      }
+    },
+    "/api/progress-photos/{id}": {
+      "get": {
+        "operationId": "ProgressPhotosController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar foto de progresso por ID",
+        "tags": [
+          "progress-photos"
+        ]
+      },
+      "delete": {
+        "operationId": "ProgressPhotosController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover foto de progresso",
+        "tags": [
+          "progress-photos"
+        ]
+      }
+    },
+    "/api/gifts": {
+      "post": {
+        "operationId": "GiftsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGiftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gifts"
+        ]
+      },
+      "get": {
+        "operationId": "GiftsController_findAll",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gifts"
+        ]
+      }
+    },
+    "/api/gifts/{id}": {
+      "get": {
+        "operationId": "GiftsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gifts"
+        ]
+      },
+      "put": {
+        "operationId": "GiftsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGiftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gifts"
+        ]
+      },
+      "delete": {
+        "operationId": "GiftsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gifts"
+        ]
+      }
+    },
+    "/api/gifts/{id}/deliver": {
+      "put": {
+        "operationId": "GiftsController_deliver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "gifts"
+        ]
+      }
+    },
+    "/api/reward-rules": {
+      "get": {
+        "operationId": "RewardRulesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-rules"
+        ]
+      },
+      "post": {
+        "operationId": "RewardRulesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRewardRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-rules"
+        ]
+      }
+    },
+    "/api/reward-rules/{id}": {
+      "put": {
+        "operationId": "RewardRulesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRewardRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-rules"
+        ]
+      },
+      "delete": {
+        "operationId": "RewardRulesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-rules"
+        ]
+      }
+    },
+    "/api/reward-achievements/check/{studentId}": {
+      "post": {
+        "operationId": "RewardAchievementsController_checkAndUpdate",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-achievements"
+        ]
+      }
+    },
+    "/api/reward-achievements": {
+      "get": {
+        "operationId": "RewardAchievementsController_findAchievements",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-achievements"
+        ]
+      }
+    },
+    "/api/reward-achievements/progress": {
+      "get": {
+        "operationId": "RewardAchievementsController_getProgress",
+        "parameters": [
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-achievements"
+        ]
+      }
+    },
+    "/api/reward-achievements/{id}/status": {
+      "put": {
+        "operationId": "RewardAchievementsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAchievementStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-achievements"
+        ]
+      }
+    },
+    "/api/reward-achievements/{id}/acknowledge": {
+      "put": {
+        "operationId": "RewardAchievementsController_acknowledge",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reward-achievements"
+        ]
+      }
+    },
+    "/api/platform-settings": {
+      "get": {
+        "operationId": "PlatformSettingsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform-settings"
+        ]
+      }
+    },
+    "/api/platform-settings/{key}": {
+      "put": {
+        "operationId": "PlatformSettingsController_upsert",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertSettingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform-settings"
+        ]
+      }
+    },
+    "/api/admin/stats": {
+      "get": {
+        "operationId": "AdminController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/personals": {
+      "get": {
+        "operationId": "AdminController_getPersonals",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/personals/{userId}/status": {
+      "put": {
+        "operationId": "AdminController_updatePersonalStatus",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Bárbara API",
+    "description": "Plataforma de gestão e acompanhamento de alunos de academia",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "personal01",
+            "description": "Campo legado; prefira identifier.",
+            "minLength": 1,
+            "maxLength": 254
+          },
+          "identifier": {
+            "type": "string",
+            "example": "user@domain.com",
+            "description": "Username ou e-mail de acesso.",
+            "minLength": 1,
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "example": "Senha@123",
+            "minLength": 4,
+            "maxLength": 128
+          }
+        }
+      },
+      "RefreshDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "f4f9a1…",
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "AddressDto": {
+        "type": "object",
+        "properties": {
+          "cep": {
+            "type": "string",
+            "example": "41820-021"
+          },
+          "street": {
+            "type": "string",
+            "example": "Rua das Flores",
+            "maxLength": 160
+          },
+          "streetNumber": {
+            "type": "string",
+            "example": "123",
+            "maxLength": 30
+          },
+          "neighborhood": {
+            "type": "string",
+            "example": "Pituba",
+            "maxLength": 100
+          },
+          "city": {
+            "type": "string",
+            "example": "Salvador",
+            "maxLength": 100
+          },
+          "uf": {
+            "type": "string",
+            "example": "BA"
+          },
+          "country": {
+            "type": "string",
+            "example": "Brasil",
+            "maxLength": 80
+          },
+          "complement": {
+            "type": "object",
+            "example": "Apto 301",
+            "maxLength": 120
+          },
+          "ibgeCode": {
+            "type": "object",
+            "example": "2927408",
+            "maxLength": 12
+          }
+        },
+        "required": [
+          "cep",
+          "street",
+          "streetNumber",
+          "neighborhood",
+          "city",
+          "uf"
+        ]
+      },
+      "UpdateMyProfileDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Maria Silva",
+            "maxLength": 120
+          },
+          "email": {
+            "type": "string",
+            "example": "maria@example.com",
+            "maxLength": 254
+          },
+          "phone": {
+            "type": "string",
+            "example": "(71) 99999-0000",
+            "maxLength": 20
+          },
+          "document": {
+            "type": "object",
+            "example": "529.982.247-25",
+            "nullable": true
+          },
+          "address": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "SenhaAtual@123",
+            "maxLength": 128
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NovaSenha@456",
+            "minLength": 6,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "CreatePersonalDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "personal01",
+            "minLength": 3,
+            "maxLength": 30
+          },
+          "password": {
+            "type": "string",
+            "example": "Senha@123",
+            "minLength": 6,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "example": "João Personal",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "email": {
+            "type": "string",
+            "example": "joao@academia.com",
+            "maxLength": 254
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 99999-0000",
+            "maxLength": 20
+          },
+          "document": {
+            "type": "string",
+            "example": "11.222.333/0001-81"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressDto"
+          }
+        },
+        "required": [
+          "password",
+          "name"
+        ]
+      },
+      "UpdatePersonalDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "document": {
+            "type": "object",
+            "example": "11.222.333/0001-81",
+            "nullable": true
+          },
+          "address": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressDto"
+              }
+            ]
+          },
+          "bio": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "BLOCKED"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "example": "NovaSenha@456",
+            "minLength": 6,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
+      "CreateStudentDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "aluno01",
+            "minLength": 3,
+            "maxLength": 30
+          },
+          "password": {
+            "type": "string",
+            "example": "Senha@123",
+            "minLength": 6,
+            "maxLength": 128
+          },
+          "name": {
+            "type": "string",
+            "example": "Maria Silva",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "email": {
+            "type": "string",
+            "example": "maria@email.com",
+            "maxLength": 254
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 99999-0001",
+            "maxLength": 20
+          },
+          "document": {
+            "type": "string",
+            "example": "529.982.247-25"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1995-08-20",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "sex": {
+            "type": "string",
+            "example": "F"
+          },
+          "height": {
+            "type": "number",
+            "example": 1.65
+          },
+          "objective": {
+            "type": "string",
+            "example": "Hipertrofia"
+          },
+          "experienceLevel": {
+            "type": "string",
+            "example": "BEGINNER"
+          },
+          "restrictions": {
+            "type": "string"
+          },
+          "observations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "name"
+        ]
+      },
+      "UpdateStudentDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "1995-08-20",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "document": {
+            "type": "object",
+            "example": "529.982.247-25",
+            "nullable": true
+          },
+          "address": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressDto"
+              }
+            ]
+          },
+          "birthDate": {
+            "type": "string"
+          },
+          "sex": {
+            "type": "string"
+          },
+          "height": {
+            "type": "number"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "experienceLevel": {
+            "type": "string"
+          },
+          "restrictions": {
+            "type": "string"
+          },
+          "observations": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateExerciseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "muscleGroup": {
+            "type": "string",
+            "enum": [
+              "CHEST",
+              "BACK",
+              "SHOULDERS",
+              "BICEPS",
+              "TRICEPS",
+              "FOREARMS",
+              "CORE",
+              "GLUTES",
+              "QUADRICEPS",
+              "HAMSTRINGS",
+              "CALVES",
+              "FULL_BODY",
+              "OTHER"
+            ]
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "isUnilateral": {
+            "type": "boolean"
+          },
+          "defaultSets": {
+            "type": "number"
+          },
+          "minReps": {
+            "type": "number"
+          },
+          "maxReps": {
+            "type": "number"
+          },
+          "defaultWeight": {
+            "type": "number"
+          },
+          "weightUnit": {
+            "type": "string",
+            "enum": [
+              "KG",
+              "LB"
+            ]
+          },
+          "restSeconds": {
+            "type": "number"
+          },
+          "rpeTarget": {
+            "type": "number"
+          },
+          "progressionEnabled": {
+            "type": "boolean"
+          },
+          "suggestedIncrement": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "muscleGroup"
+        ]
+      },
+      "UpdateExerciseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "muscleGroup": {
+            "type": "string",
+            "enum": [
+              "CHEST",
+              "BACK",
+              "SHOULDERS",
+              "BICEPS",
+              "TRICEPS",
+              "FOREARMS",
+              "CORE",
+              "GLUTES",
+              "QUADRICEPS",
+              "HAMSTRINGS",
+              "CALVES",
+              "FULL_BODY",
+              "OTHER"
+            ]
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "isUnilateral": {
+            "type": "boolean"
+          },
+          "defaultSets": {
+            "type": "number"
+          },
+          "minReps": {
+            "type": "number"
+          },
+          "maxReps": {
+            "type": "number"
+          },
+          "defaultWeight": {
+            "type": "number"
+          },
+          "weightUnit": {
+            "type": "string",
+            "enum": [
+              "KG",
+              "LB"
+            ]
+          },
+          "restSeconds": {
+            "type": "number"
+          },
+          "rpeTarget": {
+            "type": "number"
+          },
+          "progressionEnabled": {
+            "type": "boolean"
+          },
+          "suggestedIncrement": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateWorkoutPlanDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "estimatedMinutes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateWorkoutPlanDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "estimatedMinutes": {
+            "type": "number"
+          }
+        }
+      },
+      "CreatePlanDayDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "dayOfWeek"
+        ]
+      },
+      "UpdatePlanDayDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          }
+        }
+      },
+      "AddExerciseToDayDto": {
+        "type": "object",
+        "properties": {
+          "exerciseId": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "sets": {
+            "type": "number"
+          },
+          "minReps": {
+            "type": "number"
+          },
+          "maxReps": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "weightUnit": {
+            "type": "string",
+            "enum": [
+              "KG",
+              "LB"
+            ]
+          },
+          "restSeconds": {
+            "type": "number"
+          },
+          "rpeTarget": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "progressionEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "exerciseId",
+          "sets",
+          "minReps",
+          "maxReps"
+        ]
+      },
+      "UpdateExerciseOnDayDto": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "number"
+          },
+          "sets": {
+            "type": "number"
+          },
+          "minReps": {
+            "type": "number"
+          },
+          "maxReps": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "weightUnit": {
+            "type": "string",
+            "enum": [
+              "KG",
+              "LB"
+            ]
+          },
+          "restSeconds": {
+            "type": "number"
+          },
+          "rpeTarget": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "progressionEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ExerciseOrderItem": {
+        "type": "object",
+        "properties": {}
+      },
+      "ReorderExercisesDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExerciseOrderItem"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateWorkoutScheduleDto": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string"
+          },
+          "workoutPlanId": {
+            "type": "string"
+          },
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validUntil": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "studentId",
+          "workoutPlanId",
+          "dayOfWeek"
+        ]
+      },
+      "UpdateWorkoutScheduleDto": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string"
+          },
+          "workoutPlanId": {
+            "type": "string"
+          },
+          "dayOfWeek": {
+            "type": "string",
+            "enum": [
+              "MONDAY",
+              "TUESDAY",
+              "WEDNESDAY",
+              "THURSDAY",
+              "FRIDAY",
+              "SATURDAY",
+              "SUNDAY"
+            ]
+          },
+          "validFrom": {
+            "type": "string"
+          },
+          "validUntil": {
+            "type": "string"
+          }
+        }
+      },
+      "StartSessionDto": {
+        "type": "object",
+        "properties": {
+          "workoutPlanId": {
+            "type": "string"
+          },
+          "workoutPlanDayId": {
+            "type": "string"
+          },
+          "scheduledPlanId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workoutPlanId",
+          "workoutPlanDayId"
+        ]
+      },
+      "FinishSessionDto": {
+        "type": "object",
+        "properties": {
+          "isPartial": {
+            "type": "boolean"
+          },
+          "partialReason": {
+            "type": "string"
+          }
+        }
+      },
+      "RespondSuggestionDto": {
+        "type": "object",
+        "properties": {
+          "isAccepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isAccepted"
+        ]
+      },
+      "UpdateWorkoutSetDto": {
+        "type": "object",
+        "properties": {
+          "completedReps": {
+            "type": "number"
+          },
+          "usedWeight": {
+            "type": "number"
+          },
+          "rpe": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "isCompleted": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateDeloadDto": {
+        "type": "object",
+        "properties": {
+          "studentId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "reductionPercent": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "reason": {
+            "type": "string"
+          },
+          "observations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "studentId",
+          "startDate",
+          "endDate",
+          "reductionPercent"
+        ]
+      },
+      "UpdateDeloadDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "COMPLETED",
+              "CANCELLED"
+            ]
+          }
+        }
+      },
+      "CreateBodyMeasurementDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateBodyMeasurementDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UploadPhotoDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateGiftDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateGiftDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateRewardRuleDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateRewardRuleDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateAchievementStatusDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpsertSettingDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "AdminUpdateStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "BLOCKED"
+            ],
+            "example": "ACTIVE"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+    }
+  }
+}

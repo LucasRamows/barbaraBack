@@ -10,7 +10,9 @@ import {
   Put,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -31,6 +33,8 @@ export class PersonalsController {
 
   @Post()
   @ApiOperation({ summary: 'Cadastrar personal (SUPER_ADMIN)' })
+  @ApiBadRequestResponse({ description: 'Payload fora dos limites do contrato.' })
+  @ApiConflictResponse({ description: 'Username, e-mail ou CPF/CNPJ já cadastrado.' })
   create(@Body() dto: CreatePersonalDto) {
     return this.personalsService.create(dto);
   }
@@ -49,6 +53,8 @@ export class PersonalsController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar personal (SUPER_ADMIN)' })
+  @ApiBadRequestResponse({ description: 'Payload fora dos limites do contrato.' })
+  @ApiConflictResponse({ description: 'E-mail ou CPF/CNPJ já cadastrado.' })
   update(@Param('id') id: string, @Body() dto: UpdatePersonalDto) {
     return this.personalsService.update(id, dto);
   }

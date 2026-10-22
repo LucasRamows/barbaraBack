@@ -18,6 +18,8 @@ import type { CurrentUserPayload } from '../auth/current-user.decorator';
 import { WorkoutSessionsService } from './workout-sessions.service';
 import { StartSessionDto } from './dto/start-session.dto';
 import { FinishSessionDto } from './dto/finish-session.dto';
+import { WorkoutSessionFilterDto } from './dto/workout-session-filter.dto';
+import { WorkoutSessionCalendarDto } from './dto/workout-session-calendar.dto';
 
 @ApiTags('workout-sessions')
 @ApiBearerAuth()
@@ -44,16 +46,19 @@ export class WorkoutSessionsController {
   @Get()
   findAll(
     @CurrentUser() user: CurrentUserPayload,
-    @Query('studentId') studentId?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query() filters: WorkoutSessionFilterDto,
   ) {
-    return this.service.findAll(
-      user,
-      studentId,
-      Number(page ?? 1),
-      Number(limit ?? 20),
-    );
+    return this.service.findAll(user, filters);
+  }
+
+  @ApiOperation({ summary: 'Resumo mensal do calendário de sessões' })
+  @Roles(Role.ALUNO, Role.PERSONAL)
+  @Get('calendar')
+  calendar(
+    @Query() query: WorkoutSessionCalendarDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.service.findCalendar(query.month, user, query.studentId);
   }
 
   @ApiOperation({ summary: 'Buscar sessão por ID' })
@@ -72,6 +77,19 @@ export class WorkoutSessionsController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.service.finish(id, dto, user);
+  }
+
+  @ApiOperation({
+    summary: 'Marcar treino como não realizado e remover seu histórico',
+  })
+  @Roles(Role.PERSONAL)
+  @Delete(':id/history')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeFromHistory(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.service.removeFromHistory(id, user);
   }
 
   @ApiOperation({ summary: 'Abandonar sessão de treino' })

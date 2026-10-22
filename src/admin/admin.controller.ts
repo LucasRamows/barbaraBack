@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { Role, UserStatus } from '@prisma/client';
 import { IsEnum } from 'class-validator';
 import { Roles } from '../auth/roles.decorator';
 import { AdminService } from './admin.service';
 
-class UpdateStatusDto {
+class AdminUpdateStatusDto {
+  @ApiProperty({ enum: UserStatus, example: UserStatus.ACTIVE })
   @IsEnum(UserStatus) status: UserStatus;
 }
 
@@ -29,7 +30,7 @@ export class AdminController {
   @Put('personals/:userId/status')
   updatePersonalStatus(
     @Param('userId') userId: string,
-    @Body() dto: UpdateStatusDto,
+    @Body() dto: AdminUpdateStatusDto,
   ) {
     return this.adminService.updatePersonalStatus(userId, dto.status);
   }

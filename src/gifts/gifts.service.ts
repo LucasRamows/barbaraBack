@@ -100,6 +100,9 @@ export class GiftsService {
     dto: UpdateGiftDto,
     currentUser: CurrentUserPayload,
   ) {
+    if (currentUser.role !== Role.PERSONAL) {
+      throw new ForbiddenException('Somente o personal pode editar gifts.');
+    }
     await this.findOne(id, currentUser);
     if (dto.studentId) {
       const personal = await this.getPersonalProfile(currentUser.sub);

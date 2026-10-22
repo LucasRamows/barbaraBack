@@ -1,16 +1,11 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RewardAchievementStatus, Role } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Role } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
 import { RewardAchievementsService } from './reward-achievements.service';
-
-class UpdateAchievementStatusDto {
-  @IsEnum(RewardAchievementStatus) status: RewardAchievementStatus;
-  @IsOptional() @IsString() notes?: string;
-}
+import { UpdateAchievementStatusDto } from './dto/update-achievement-status.dto';
 
 @ApiTags('reward-achievements')
 @ApiBearerAuth()
@@ -25,6 +20,18 @@ export class RewardAchievementsController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.service.checkAndUpdate(studentId, user);
+  }
+
+  @Post('process-jobs')
+  @Roles(Role.PERSONAL, Role.SUPER_ADMIN)
+  processJobs(@CurrentUser() user: CurrentUserPayload) {
+    return this.service.processPendingJobs(user);
+  }
+
+  @Post('jobs/:id/reprocess')
+  @Roles(Role.PERSONAL, Role.SUPER_ADMIN)
+  reprocessJob(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+    return this.service.reprocessJob(id, user);
   }
 
   @Get()
@@ -46,7 +53,7 @@ export class RewardAchievementsController {
   }
 
   @Put(':id/status')
-  @Roles(Role.PERSONAL, Role.ALUNO)
+  @Roles(Role.PERSONAL)
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateAchievementStatusDto,

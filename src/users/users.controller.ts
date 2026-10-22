@@ -7,7 +7,13 @@ import {
   Patch,
   Put,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { CurrentUserPayload } from '../auth/current-user.decorator';
@@ -28,6 +34,8 @@ export class UsersController {
 
   @Patch('me/profile')
   @ApiOperation({ summary: 'Atualizar o próprio perfil' })
+  @ApiBadRequestResponse({ description: 'Payload fora dos limites do contrato.' })
+  @ApiConflictResponse({ description: 'E-mail ou CPF/CNPJ já cadastrado.' })
   updateMyProfile(
     @CurrentUser() currentUser: CurrentUserPayload,
     @Body() dto: UpdateMyProfileDto,

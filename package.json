@@ -22,6 +22,8 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:seed": "ts-node -r tsconfig-paths/register prisma/seed.ts",
+    "audit:identities": "ts-node -r tsconfig-paths/register prisma/audit-identities.ts",
+    "backfill:identities": "ts-node -r tsconfig-paths/register prisma/backfill-identities.ts",
     "openapi:export": "nest start -- --export-openapi"
   },
   "dependencies": {

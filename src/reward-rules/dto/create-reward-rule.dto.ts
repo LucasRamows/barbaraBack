@@ -14,7 +14,7 @@ export class CreateRewardRuleDto {
   @IsString() name: string;
   @IsOptional() @IsString() description?: string;
   @IsEnum(RewardRuleType) type: RewardRuleType;
-  @IsOptional() @IsNumber() @Min(0) targetValue?: number;
+  @IsOptional() @IsNumber({ allowNaN: false, allowInfinity: false }) @Min(0) targetValue?: number;
   @IsOptional() @IsString() period?: string;
   @IsOptional() @IsObject() conditions?: Record<string, unknown>;
   @IsOptional() @IsDateString() startDate?: string;

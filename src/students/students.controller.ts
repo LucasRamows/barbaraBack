@@ -9,7 +9,14 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiForbiddenResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Role, UserStatus } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -29,6 +36,8 @@ export class StudentsController {
 
   @Post()
   @ApiOperation({ summary: 'Cadastrar aluno (PERSONAL)' })
+  @ApiBadRequestResponse({ description: 'Campos ou data inválidos.' })
+  @ApiConflictResponse({ description: 'Username, e-mail ou CPF/CNPJ já cadastrado.' })
   create(
     @Body() dto: CreateStudentDto,
     @CurrentUser() currentUser: CurrentUserPayload,
@@ -44,6 +53,7 @@ export class StudentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Detalhar aluno' })
+  @ApiForbiddenResponse({ description: 'Aluno sem vínculo com o personal.' })
   findOne(
     @Param('id') id: string,
     @CurrentUser() currentUser: CurrentUserPayload,
@@ -53,6 +63,9 @@ export class StudentsController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar aluno' })
+  @ApiBadRequestResponse({ description: 'Campos ou data inválidos.' })
+  @ApiConflictResponse({ description: 'E-mail ou CPF/CNPJ já cadastrado.' })
+  @ApiForbiddenResponse({ description: 'Aluno sem vínculo com o personal.' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateStudentDto,

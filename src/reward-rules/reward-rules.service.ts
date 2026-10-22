@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -24,6 +25,15 @@ export class RewardRulesService {
 
   async create(dto: CreateRewardRuleDto, currentUser: CurrentUserPayload) {
     const personal = await this.getPersonalProfile(currentUser.sub);
+    if (dto.type === 'CUSTOM') {
+      throw new BadRequestException('Tipo CUSTOM não é executável.');
+    }
+    if (dto.giftId) {
+      const gift = await this.prisma.gift.findFirst({
+        where: { id: dto.giftId, personalId: personal.id, deletedAt: null },
+      });
+      if (!gift) throw new ForbiddenException('Gift não pertence a este personal.');
+    }
     return this.prisma.rewardRule.create({
       data: {
         personalId: personal.id,
@@ -72,7 +82,16 @@ export class RewardRulesService {
   }
 
   async update(id: string, dto: UpdateRewardRuleDto, currentUser: CurrentUserPayload) {
-    await this.findOne(id, currentUser);
+    const existing = await this.findOne(id, currentUser);
+    if (dto.type === 'CUSTOM') {
+      throw new BadRequestException('Tipo CUSTOM não é executável.');
+    }
+    if (dto.giftId) {
+      const gift = await this.prisma.gift.findFirst({
+        where: { id: dto.giftId, personalId: existing.personalId, deletedAt: null },
+      });
+      if (!gift) throw new ForbiddenException('Gift não pertence a este personal.');
+    }
     return this.prisma.rewardRule.update({
       where: { id },
       data: {

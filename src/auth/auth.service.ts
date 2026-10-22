@@ -9,6 +9,8 @@ import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { Role, UserStatus } from '@prisma/client';
+import { normalizeUsername, normalizeEmail } from '../identity/identity-audit';
+import { resolveJwtSecret } from '../config/security.config';
 
 interface JwtPayload {
   sub: string;
@@ -24,7 +26,7 @@ export class AuthService {
   private readonly refreshTokenTtl = 7 * 24 * 60 * 60; // 7 days in seconds
 
   constructor(private prisma: PrismaService) {
-    this.jwtSecret = process.env.JWT_SECRET ?? 'change_me_in_production';
+    this.jwtSecret = resolveJwtSecret();
   }
 
   async login(dto: LoginDto) {
@@ -33,8 +35,25 @@ export class AuthService {
       'Usuário ou senha inválidos.',
     );
 
+    const rawIdentifier = dto.identifier ?? dto.username;
+    if (!rawIdentifier || !rawIdentifier.trim()) {
+      throw invalidCredentials;
+    }
+
+    const trimmed = rawIdentifier.trim();
+    const normalizedUsername = normalizeUsername(trimmed);
+    const normalizedEmail = normalizeEmail(trimmed);
+
     const user = await this.prisma.user.findFirst({
-      where: { username: dto.username, deletedAt: null },
+      where: {
+        OR: [
+          { username: trimmed },
+          { usernameNormalized: normalizedUsername },
+          { email: trimmed },
+          { emailNormalized: normalizedEmail },
+        ],
+        deletedAt: null,
+      },
       include: {
         personalProfile: { select: { name: true } },
         studentProfile: { select: { name: true } },
@@ -111,17 +130,20 @@ export class AuthService {
   }
 
   private signAccessToken(userId: string, role: Role): string {
-    return jwt.sign({ sub: userId, role }, this.jwtSecret, {
-      expiresIn: this.accessTokenTtl,
-    });
+    const payload: JwtPayload = { sub: userId, role };
+    return jwt.sign(payload, this.jwtSecret, { expiresIn: this.accessTokenTtl });
   }
 
   private async createRefreshToken(userId: string): Promise<string> {
-    const token = randomBytes(64).toString('hex');
+    const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + this.refreshTokenTtl * 1000);
 
     await this.prisma.refreshToken.create({
-      data: { token, userId, expiresAt },
+      data: {
+        token,
+        userId,
+        expiresAt,
+      },
     });
 
     return token;
