@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { Prisma, Role, WorkoutSessionStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +13,7 @@ import { StartSessionDto } from './dto/start-session.dto';
 import { FinishSessionDto } from './dto/finish-session.dto';
 import { WorkoutSessionFilterDto } from './dto/workout-session-filter.dto';
 import { RewardAchievementsService } from '../reward-achievements/reward-achievements.service';
+import { PushNotificationsService } from '../notifications/push-notifications.service';
 
 @Injectable()
 export class WorkoutSessionsService {
@@ -19,6 +21,7 @@ export class WorkoutSessionsService {
     private prisma: PrismaService,
     private loadProgressionService: LoadProgressionService,
     private rewardAchievements: RewardAchievementsService,
+    @Optional() private pushNotifications?: PushNotificationsService,
   ) {}
 
   private async getStudentProfile(userId: string) {
@@ -203,6 +206,17 @@ export class WorkoutSessionsService {
       }
       throw error;
     }
+
+    const personalUser = await this.prisma.personalProfile.findUnique({
+      where: { id: planDay.workoutPlan.personalId },
+      select: { userId: true },
+    });
+    if (personalUser) void this.pushNotifications?.notifyUser(personalUser.userId, {
+      title: 'Aluno iniciou um treino',
+      body: `${student.name} começou o treino ${planDay.workoutPlan.name}.`,
+      url: `/personal/alunos/${student.id}`,
+      tag: `workout-started-${session.id}`,
+    });
 
     return session;
   }
@@ -392,6 +406,16 @@ export class WorkoutSessionsService {
       id,
       { status: updated.status },
     );
+    const studentUser = await this.prisma.studentProfile.findUnique({
+      where: { id: session.studentId },
+      select: { userId: true },
+    });
+    if (studentUser) void this.pushNotifications?.notifyUser(studentUser.userId, {
+        title: 'Treino concluído',
+        body: dto.isPartial ? 'Seu treino foi encerrado parcialmente.' : 'Seu treino foi concluído com sucesso.',
+        url: '/historico',
+        tag: `workout-finished-${id}`,
+      });
 
     return updated;
   }

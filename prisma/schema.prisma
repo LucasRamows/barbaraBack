@@ -148,11 +148,26 @@ model User {
   refreshTokens   RefreshToken[]
   auditLogs       AuditLog[]
   address         UserAddress?
+  pushSubscriptions PushSubscription[]
 
   @@index([username])
   @@index([role])
   @@index([status])
   @@index([deletedAt])
+}
+
+model PushSubscription {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint       String   @unique @db.Text
+  expirationTime BigInt?
+  p256dh         String   @db.Text
+  auth           String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model UserAddress {

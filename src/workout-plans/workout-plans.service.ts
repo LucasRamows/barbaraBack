@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
@@ -13,6 +14,7 @@ import { UpdatePlanDayDto } from './dto/update-plan-day.dto';
 import { AddExerciseToDayDto } from './dto/add-exercise-to-day.dto';
 import { UpdateExerciseOnDayDto } from './dto/update-exercise-on-day.dto';
 import { ReorderExercisesDto } from './dto/reorder-exercises.dto';
+import { PushNotificationsService } from '../notifications/push-notifications.service';
 
 const DAY_WITH_EXERCISES = {
   orderBy: { order: 'asc' as const },
@@ -30,7 +32,21 @@ const DAY_WITH_EXERCISES = {
 
 @Injectable()
 export class WorkoutPlansService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private pushNotifications?: PushNotificationsService,
+  ) {}
+
+  private async notifyPlanStudents(planId: string, body: string) {
+    const schedules = await this.prisma.workoutSchedule.findMany({
+      where: { workoutPlanId: planId, isActive: true },
+      select: { student: { select: { userId: true } } },
+    });
+    void this.pushNotifications?.notifyUsers(
+      schedules.map(({ student }) => student.userId),
+      { title: 'Treino atualizado', body, url: '/', tag: `workout-updated-${planId}` },
+    );
+  }
 
   private async getPersonal(userId: string) {
     const profile = await this.prisma.personalProfile.findUnique({
@@ -136,7 +152,7 @@ export class WorkoutPlansService {
   ) {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedPlan(id, personal.id);
-    return this.prisma.workoutPlan.update({
+    const updated = await this.prisma.workoutPlan.update({
       where: { id },
       data: {
         name: dto.name,
@@ -146,6 +162,8 @@ export class WorkoutPlansService {
         isActive: dto.isActive,
       },
     });
+    await this.notifyPlanStudents(id, 'Seu personal alterou sua ficha de treino.');
+    return updated;
   }
 
   async removePlan(id: string, currentUser: CurrentUserPayload) {
@@ -222,7 +240,7 @@ export class WorkoutPlansService {
   ) {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedPlan(planId, personal.id);
-    return this.prisma.workoutPlanDay.create({
+    const created = await this.prisma.workoutPlanDay.create({
       data: {
         workoutPlanId: planId,
         dayOfWeek: dto.dayOfWeek,
@@ -230,6 +248,8 @@ export class WorkoutPlansService {
         order: dto.order ?? 0,
       },
     });
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
+    return created;
   }
 
   async updateDay(
@@ -240,10 +260,12 @@ export class WorkoutPlansService {
   ) {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedDay(planId, dayId, personal.id);
-    return this.prisma.workoutPlanDay.update({
+    const updated = await this.prisma.workoutPlanDay.update({
       where: { id: dayId },
       data: { dayOfWeek: dto.dayOfWeek, label: dto.label, order: dto.order },
     });
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
+    return updated;
   }
 
   async removeDay(
@@ -254,6 +276,7 @@ export class WorkoutPlansService {
     const personal = await this.getPersonal(currentUser.sub);
     await this.getOwnedDay(planId, dayId, personal.id);
     await this.prisma.workoutPlanDay.delete({ where: { id: dayId } });
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
   }
 
   // ---- EXERCISES ON DAY ----
@@ -276,7 +299,7 @@ export class WorkoutPlansService {
       where: { workoutPlanDayId: dayId },
     });
 
-    return this.prisma.workoutExercise.create({
+    const created = await this.prisma.workoutExercise.create({
       data: {
         workoutPlanDayId: dayId,
         exerciseId: dto.exerciseId,
@@ -293,6 +316,8 @@ export class WorkoutPlansService {
       },
       include: { exercise: { include: { images: true } } },
     });
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
+    return created;
   }
 
   async updateExerciseOnDay(
@@ -311,7 +336,7 @@ export class WorkoutPlansService {
     if (!existing)
       throw new NotFoundException('Exercício na ficha não encontrado.');
 
-    return this.prisma.workoutExercise.update({
+    const updated = await this.prisma.workoutExercise.update({
       where: { id: workoutExId },
       data: {
         order: dto.order,
@@ -327,6 +352,8 @@ export class WorkoutPlansService {
       },
       include: { exercise: { include: { images: true } } },
     });
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
+    return updated;
   }
 
   async removeExerciseFromDay(
@@ -345,6 +372,7 @@ export class WorkoutPlansService {
       throw new NotFoundException('Exercício na ficha não encontrado.');
 
     await this.prisma.workoutExercise.delete({ where: { id: workoutExId } });
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
   }
 
   async reorderExercises(
@@ -364,5 +392,6 @@ export class WorkoutPlansService {
         }),
       ),
     );
+    await this.notifyPlanStudents(planId, 'Seu personal alterou sua ficha de treino.');
   }
 }

@@ -22,6 +22,7 @@ import { RewardAchievementsModule } from './reward-achievements/reward-achieveme
 import { PlatformSettingsModule } from './platform-settings/platform-settings.module';
 import { AdminModule } from './admin/admin.module';
 import { HealthModule } from './health/health.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { HealthModule } from './health/health.module';
     PlatformSettingsModule,
     AdminModule,
     HealthModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

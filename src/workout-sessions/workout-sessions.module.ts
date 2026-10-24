@@ -4,9 +4,10 @@ import { LoadProgressionModule } from '../load-progression/load-progression.modu
 import { WorkoutSessionsController } from './workout-sessions.controller';
 import { WorkoutSessionsService } from './workout-sessions.service';
 import { RewardAchievementsModule } from '../reward-achievements/reward-achievements.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, LoadProgressionModule, RewardAchievementsModule],
+  imports: [PrismaModule, LoadProgressionModule, RewardAchievementsModule, NotificationsModule],
   controllers: [WorkoutSessionsController],
   providers: [WorkoutSessionsService],
   exports: [WorkoutSessionsService],

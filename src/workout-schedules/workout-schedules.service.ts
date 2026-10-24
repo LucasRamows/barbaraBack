@@ -3,16 +3,21 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { DayOfWeek, WorkoutSessionStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CurrentUserPayload } from '../auth/current-user.decorator';
 import { CreateWorkoutScheduleDto } from './dto/create-schedule.dto';
 import { UpdateWorkoutScheduleDto } from './dto/update-schedule.dto';
+import { PushNotificationsService } from '../notifications/push-notifications.service';
 
 @Injectable()
 export class WorkoutSchedulesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private pushNotifications?: PushNotificationsService,
+  ) {}
 
   private readonly detailedPlanInclude = {
     days: {
@@ -81,7 +86,7 @@ export class WorkoutSchedulesService {
     });
 
     if (existing) {
-      return this.prisma.workoutSchedule.update({
+      const updated = await this.prisma.workoutSchedule.update({
         where: { id: existing.id },
         data: {
           workoutPlanId: dto.workoutPlanId,
@@ -90,9 +95,13 @@ export class WorkoutSchedulesService {
         },
         include: { workoutPlan: { select: { id: true, name: true } } },
       });
+      void this.pushNotifications?.notifyStudent(dto.studentId, {
+        title: 'Treino atualizado', body: 'Seu personal alterou sua programação de treino.', url: '/', tag: `schedule-updated-${existing.id}`,
+      });
+      return updated;
     }
 
-    return this.prisma.workoutSchedule.create({
+    const created = await this.prisma.workoutSchedule.create({
       data: {
         studentId: dto.studentId,
         workoutPlanId: dto.workoutPlanId,
@@ -102,6 +111,10 @@ export class WorkoutSchedulesService {
       },
       include: { workoutPlan: { select: { id: true, name: true } } },
     });
+    void this.pushNotifications?.notifyStudent(dto.studentId, {
+      title: 'Novo treino programado', body: 'Seu personal atualizou sua programação de treino.', url: '/', tag: `schedule-created-${created.id}`,
+    });
+    return created;
   }
 
   async findByStudent(studentId: string, currentUser: CurrentUserPayload) {
@@ -254,7 +267,7 @@ export class WorkoutSchedulesService {
     if (dto.workoutPlanId)
       await this.assertPlanOwnership(personal.id, dto.workoutPlanId);
 
-    return this.prisma.workoutSchedule.update({
+    const updated = await this.prisma.workoutSchedule.update({
       where: { id },
       data: {
         workoutPlanId: dto.workoutPlanId,
@@ -264,6 +277,10 @@ export class WorkoutSchedulesService {
       },
       include: { workoutPlan: { select: { id: true, name: true } } },
     });
+    void this.pushNotifications?.notifyStudent(schedule.studentId, {
+      title: 'Treino atualizado', body: 'Seu personal alterou sua programação de treino.', url: '/', tag: `schedule-updated-${id}`,
+    });
+    return updated;
   }
 
   async remove(id: string, currentUser: CurrentUserPayload) {
@@ -294,5 +311,8 @@ export class WorkoutSchedulesService {
       }),
       this.prisma.workoutSchedule.delete({ where: { id } }),
     ]);
+    void this.pushNotifications?.notifyStudent(schedule.studentId, {
+      title: 'Treino removido', body: 'Seu personal removeu um treino da sua programação.', url: '/', tag: `schedule-removed-${id}`,
+    });
   }
 }
